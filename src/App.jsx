@@ -1,10 +1,15 @@
-import React from "react";
 import { ChakraProvider, Container } from "@chakra-ui/react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import ProductList from "./ProductList";
 // import ProductDetailsPage from "./ProductDetails";
-import ScholarshipView from "./scholarship/View";
+import React from "react";
 import AutomatedForm from "./scholarship/AutomatedForm";
+import ScholarshipView from "./scholarship/View";
+// import ProductDetailsPage from "./ProductDetails";
+import Detials from "./content/Detials";
+import MediaPage from "./content/MediaPage";
+import UserDetailsForm from "./content/UserDetailsForm";
 
 const products = [
   {
@@ -76,6 +81,9 @@ const App = () => {
               path="/automatedForm/:jobId/:transactionId"
               element={<AutomatedForm />}
             />
+            <Route path="/details" element={<Detials />} />
+            <Route path="/confirm/:itemId" element={<MediaPage />} />
+            <Route path="/form" element={<UserDetailsForm />} />
           </Routes>
         </Router>
       </Container>
