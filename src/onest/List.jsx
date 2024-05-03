@@ -19,7 +19,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { dataConfig } from "./card";
 import axios from "axios";
 
-const DisplayData = () => {
+const List = () => {
   const [cardData, setCardData] = useState();
   const [filterCardData, setFilterCardData] = useState();
   const [filterData, setfilterData] = useState();
