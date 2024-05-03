@@ -1,13 +1,15 @@
 import { ChakraProvider, Container } from "@chakra-ui/react";
-import React from "react";
+
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import ProductList from "./ProductList";
 // import ProductDetailsPage from "./ProductDetails";
-import React from "react";
+
 import AutomatedForm from "./job/AutomatedForm";
 import JobDetails from "./job/JobDetails";
 // import ProductDetailsPage from "./ProductDetails";
 import React from "react";
+import LandingPage from './LandingPage';
+import DisplayData from './DisplayData';
 import ScholarshipView from "./scholarship/View";
 // import ProductDetailsPage from "./ProductDetails";
 import Detials from "./content/Detials";
@@ -73,7 +75,8 @@ const App = () => {
         <Router>
           <Routes>
             {/* Route to display ProductList component with products data */}
-            <Route path="/" element={<ProductList data={products} />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/display/:type" element={<DisplayData />} />
             {/* Route to display ProductDetailsPage component for specific product */}
             {/* <Route
               path="/product/:productId"
