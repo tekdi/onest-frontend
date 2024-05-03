@@ -1,11 +1,11 @@
 import { ChakraProvider, Container } from "@chakra-ui/react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import LandingPage from "./onest/LandingPage";
-import MediaPage from "./onest/content/MediaPage";
-import UserDetailsForm from "./onest/content/UserDetailsForm";
-import AutomatedForm from "./onest/job/AutomatedForm";
-import List from "./onest/List";
-import View from "./onest/View";
+import LandingPage from "./LandingPage";
+import MediaPage from "./content/MediaPage";
+import UserDetailsForm from "./content/UserDetailsForm";
+import AutomatedForm from "./job/AutomatedForm";
+import List from "./List";
+import View from "./View";
 
 const App = () => {
   return (
