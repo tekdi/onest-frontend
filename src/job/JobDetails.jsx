@@ -12,11 +12,16 @@ import { registerTelementry } from "../api/Apicall";
 // import Header from "./Header";
 import Loader from "./Loader";
 import "./Shared.css";
-const baseUrl = import.meta.env.VITE_API_BASE_URL;
-const db_cache = import.meta.env.VITE_DB_CACHE;
-const envConfig = import.meta.env;
-console.log("baseUrl", baseUrl);
+import { dataConfig } from "../card";
+
+
 function JobDetails() {
+  const { type } = useParams();
+ 
+  const baseUrl = dataConfig[type].apiLink_API_BASE_URL
+  const db_cache = dataConfig[type].apiLink_DB_CACHE;
+  const envConfig = dataConfig[type];
+
   const [loading, setLoading] = useState(true);
 
   const location = useLocation();

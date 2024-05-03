@@ -23,7 +23,6 @@ const App = () => {
       <Container maxW="container.lg" mt={8}>
         <Router>
           <Routes>
-        
             <Route path="/" element={<LandingPage />} />
             <Route path="/display/:type" element={<DisplayData />} />
             {/* Route to display ProductDetailsPage component for specific product */}
@@ -31,8 +30,8 @@ const App = () => {
               path="/product/:productId"
               element={<ProductDetailsPage products={products} />}
             /> */}
-            <Route path="/jobDetails/:jobId" element={<JobDetails />} />
-            <Route path="/scholarship/:jobId" element={<ScholarshipView />} />
+            <Route path="display/jobs/:type/:jobId" element={<JobDetails />} />
+            <Route path="display/scholarship/:type/:jobId" element={<ScholarshipView />} />
             <Route
               path="/automatedForm/:jobId/:transactionId"
               element={<AutomatedForm />}
