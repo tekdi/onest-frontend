@@ -4,7 +4,10 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import ProductList from "./ProductList";
 // import ProductDetailsPage from "./ProductDetails";
 import React from "react";
-import AutomatedForm from "./scholarship/AutomatedForm";
+import AutomatedForm from "./job/AutomatedForm";
+import JobDetails from "./job/JobDetails";
+// import ProductDetailsPage from "./ProductDetails";
+import React from "react";
 import ScholarshipView from "./scholarship/View";
 // import ProductDetailsPage from "./ProductDetails";
 import Detials from "./content/Detials";
@@ -76,6 +79,7 @@ const App = () => {
               path="/product/:productId"
               element={<ProductDetailsPage products={products} />}
             /> */}
+            <Route path="/jobDetails/:jobId" element={<JobDetails />} />
             <Route path="/scholarship/:jobId" element={<ScholarshipView />} />
             <Route
               path="/automatedForm/:jobId/:transactionId"

@@ -1,10 +1,9 @@
 import { get, post, update as coreUpdate, patch, distory } from "./index";
 import config from "./config.json";
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
-import telementryJson from '../assets/bodyJson/telementry.json';
+import telementryJson from "../assets/bodyJson/telementry.json";
 
 //const baseUrl = 'https://jobs-api.tekdinext.com';
-
 
 const searchUrl = import.meta.env.VITE_BASE_URL;
 const sunbird = import.meta.env.VITE_SUNBIRD_API;
@@ -104,9 +103,9 @@ export const getTekdiallContent = async (header = {}) => {
       } else {
         return {};
       }
-    } else if (data?.apiEndPoint === "/content/search") {
+    } else if (data?.apiEndPoint === "/jobs/search") {
       // this is  api for Tekdi search
-      const result = await post(`${baseUrl}/content/search`, bodyData, {
+      const result = await post(`${baseUrl}/jobs/search`, bodyData, {
         headers,
       });
       if (result.data) {
@@ -114,9 +113,9 @@ export const getTekdiallContent = async (header = {}) => {
       } else {
         return {};
       }
-    } else {
+    } else if (data?.apiEndPoint === "/content/search") {
+      // this is  api for Tekdi search
       const result = await post(`${baseUrl}/content/search`, bodyData, {
-        // Default tekdi search
         headers,
       });
       if (result.data) {
@@ -162,9 +161,16 @@ export const getallContent = async (params = {}, header = {}) => {
   };
 
   try {
-    const result = await post(`${baseUrl}/content/search`, params, {
-      headers,
-    });
+    let result;
+    if (data?.apiEndPoint === "/jobs/search") {
+      result = await post(`${baseUrl}/jobs/search`, params, {
+        headers,
+      });
+    } else {
+      result = await post(`${baseUrl}/content/search`, params, {
+        headers,
+      });
+    }
     if (result.data) {
       return result.data;
     } else {
@@ -603,7 +609,6 @@ export const getShikshaWithBody = async (id, header = {}) => {
   }
 };
 
-
 //Job seeker
 
 export const getSelectedJobDetails = async (params = {}, header = {}) => {
@@ -628,28 +633,45 @@ export const getSelectedJobDetails = async (params = {}, header = {}) => {
   }
 };
 
- export const registerTelementry = async (siteUrl, transactionId) => {
-  localStorage.setItem('transactionId', transactionId)
+export const registerTelementry = async (siteUrl, transactionId) => {
+  localStorage.setItem("transactionId", transactionId);
   const url = new URL(siteUrl);
   telementryJson.events[0].ets = Date.now();
   telementryJson.events[0].transId = transactionId;
   telementryJson.events[0].actor.id = url.searchParams.get("agent-id") || "";
 
-  telementryJson.events[0].actor.agent = url.searchParams.get("agent") ? url.searchParams.get("agent") : "";
-  telementryJson.events[0].actor.distributor = url.searchParams.get("distributor-name") ? url.searchParams.get("distributor-name") : "";
-  telementryJson.events[0].context.channel = url.hostname.split('.')[0];
+  telementryJson.events[0].actor.agent = url.searchParams.get("agent")
+    ? url.searchParams.get("agent")
+    : "";
+  telementryJson.events[0].actor.distributor = url.searchParams.get(
+    "distributor-name"
+  )
+    ? url.searchParams.get("distributor-name")
+    : "";
+  telementryJson.events[0].context.channel = url.hostname.split(".")[0];
   telementryJson.events[0].edata.pageurl = siteUrl;
+  telementryJson.events[0].edata.utm_source = localStorage.getItem("utm_source")
+    ? localStorage.getItem("utm_source")
+    : "";
 
-
-  console.log(telementryJson);
   try {
-    const response = post(`${baseUrl}/content/telemetry`, telementryJson, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    let response;
+    if (data?.apiEndPoint === "/content/search") {
+      response = post(`${baseUrl}/jobs/telemetry`, telementryJson, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } else {
+      response = post(`${baseUrl}/content/telemetry`, telementryJson, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
+    console.log(telementryJson);
     console.log(response.data);
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
   }
-}
+};
