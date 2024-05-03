@@ -8,6 +8,7 @@ import ScholarshipView from "./scholarship/View";
 import Detials from "./content/Detials";
 import MediaPage from "./content/MediaPage";
 import UserDetailsForm from "./content/UserDetailsForm";
+import View from "./job/View";
 
 const App = () => {
   return (
@@ -17,13 +18,14 @@ const App = () => {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/:type" element={<DisplayData />} />
-            <Route path="/jobs/:jobId" element={<JobDetails />} />
-            <Route path="/scholarship/:jobId" element={<ScholarshipView />} />
+            <Route path="/:type/:jobId" element={< View />} />
+            {/* <Route path="/jobs/:jobId" element={<JobDetails />} />
+            <Route path="/scholarship/:jobId" element={<ScholarshipView />} /> */}
             <Route
               path="/automatedForm/:jobId/:transactionId"
               element={<AutomatedForm />}
             />
-            <Route path="/learning/:itemId" element={<Detials />} />
+            {/* <Route path="/learning/:itemId" element={<Detials />} /> */}
             <Route path="/confirm/:itemId" element={<MediaPage />} />
             <Route path="/form" element={<UserDetailsForm />} />
           </Routes>
