@@ -1,9 +1,10 @@
 import { get, post, update as coreUpdate, patch, distory } from "./index";
 import config from "./config.json";
-const baseUrl = import.meta.env.VITE_API_BASE_URL;
-import telementryJson from "../assets/bodyJson/telementry.json";
+import apiPath from "./ApiUrl.json";
 
-//const baseUrl = 'https://jobs-api.tekdinext.com';
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+const env = import.meta.env;
+
 
 const searchUrl = import.meta.env.VITE_BASE_URL;
 const sunbird = import.meta.env.VITE_SUNBIRD_API;
@@ -79,7 +80,7 @@ export const getTekdiallContent = async (header = {}) => {
       },
       transaction_id: "a9aaecca-10b7-4d19-b640-b047a7c60008",
       message_id: "a9aaecca-10b7-4d19-b640-b047a7c60009",
-      timestamp: "2023-02-06T09:55:41.161Z",
+      timestamp: new Date().toISOString(),
     },
     message: {
       intent: {
@@ -103,9 +104,9 @@ export const getTekdiallContent = async (header = {}) => {
       } else {
         return {};
       }
-    } else if (data?.apiEndPoint === "/jobs/search") {
+    } else if (data?.apiEndPoint ===`${env?.VITE_API_ROUTE}/search`) {
       // this is  api for Tekdi search
-      const result = await post(`${baseUrl}/jobs/search`, bodyData, {
+      const result = await post(`/${baseUrl}/${env?.VITE_API_ROUTE}/search`, bodyData, {
         headers,
       });
       if (result.data) {
@@ -113,9 +114,9 @@ export const getTekdiallContent = async (header = {}) => {
       } else {
         return {};
       }
-    } else if (data?.apiEndPoint === "/content/search") {
-      // this is  api for Tekdi search
-      const result = await post(`${baseUrl}/content/search`, bodyData, {
+    } else {
+      const result = await post(`${baseUrl}/${env?.VITE_API_ROUTE}/search`, bodyData, {
+        // Default tekdi search
         headers,
       });
       if (result.data) {
@@ -138,7 +139,7 @@ export const getAllCollections = async (params = {}, header = {}) => {
   };
 
   try {
-    const result = await get(`${baseUrl}/seeker/collection`, {
+    const result = await get(`${baseUrl}/${collection}`, {
       headers,
     });
 
@@ -161,16 +162,7 @@ export const getallContent = async (params = {}, header = {}) => {
   };
 
   try {
-    let result;
-    if (data?.apiEndPoint === "/jobs/search") {
-      result = await post(`${baseUrl}/jobs/search`, params, {
-        headers,
-      });
-    } else {
-      result = await post(`${baseUrl}/content/search`, params, {
-        headers,
-      });
-    }
+    const result = await post(`${baseUrl}/${env?.VITE_API_ROUTE}/${apiPath.search}`);
     if (result.data) {
       return result.data;
     } else {
@@ -184,6 +176,55 @@ export const getallContent = async (params = {}, header = {}) => {
   }
 };
 
+export const getseletedData = async (params = {}, header = {}) => {
+  let headers = {
+    ...header,
+  };
+
+  try {
+    const result = await post(`${baseUrl}/${apiPath?.select}`, params, {
+      headers,
+    });
+    if (result) {
+      return result.data;
+    } else {
+      return {};
+    }
+  } catch ({ response, message }) {
+    return {
+      status: response?.status ? response?.status : 404,
+      error: response?.data?.message ? response?.data?.message : message,
+    };
+  }
+};
+
+export const getconfirmdata = async (params = {}, header = {}) => {
+  let headers = {
+    ...header,
+  };
+
+  try {
+    const result = await post(`${baseUrl}/${apiPath?.confirm}`, params, {
+      headers,
+    });
+    if (result) {
+      return result?.data;
+    } else {
+      return {};
+    }
+  } catch ({ response, message }) {
+    return {
+      status: response?.status ? response?.status : 404,
+      error: response?.data?.message ? response?.data?.message : message,
+    };
+  }
+};
+
+
+
+
+
+
 export const getContentbyCollectionId = async (
   id,
   params = {},
@@ -194,7 +235,7 @@ export const getContentbyCollectionId = async (
   };
 
   try {
-    const result = await get(`${baseUrl}/seeker/collection/${id}`, {
+    const result = await get(`${baseUrl}/${apiPath?.collection}/${id}`, {
       headers,
     });
     if (result?.data) {
@@ -258,7 +299,7 @@ export const createBookmarks = async (params = {}, header = {}) => {
     Authorization: "Bearer " + localStorage.getItem("token"),
   };
   try {
-    const result = await post(`${baseUrl}/seeker/bookmark`, params, {
+    const result = await post(`${baseUrl}/${apiPath?.bookmark}`, params, {
       headers,
     });
     if (result?.data) {
@@ -303,7 +344,7 @@ export const getAllBookMarks = async (params = {}, header = {}) => {
   };
 
   try {
-    const result = await get(`${baseUrl}/seeker/bookmark`, {
+    const result = await get(`${baseUrl}/${apiPath?.bookmark}`, {
       headers,
     });
 
@@ -327,7 +368,7 @@ export const getBookmarksbyId = async (id, params = {}, header = {}) => {
   };
 
   try {
-    const result = await get(`${baseUrl}/seeker/bookmark/${id}`, {
+    const result = await get(`${baseUrl}/${apiPath?.bookmark}/${id}`, {
       headers,
     });
 
@@ -378,7 +419,7 @@ export const removebookmarkFromList = async (id, header = {}) => {
       Authorization: "Bearer " + localStorage.getItem("token"),
     };
     const result = await distory(
-      `${baseUrl}/seeker/bookmark/${id}`,
+      `${baseUrl}/${apiPath?.bookmark}/${id}`,
       {},
       {
         headers: headers ? headers : {},
@@ -444,28 +485,6 @@ export const resetPassword = async (params = {}, header = {}) => {
   }
 };
 
-export const addConfiguration = async (params = {}, header = {}) => {
-  let headers = {
-    ...header,
-    Authorization: "Bearer " + localStorage.getItem("token"),
-  };
-  try {
-    const result = await post(`${baseUrl}/seeker/configuration`, params, {
-      headers,
-    });
-    if (result?.data) {
-      return result?.data;
-    } else {
-      return {};
-    }
-  } catch ({ response, message }) {
-    return {
-      status: response?.status ? response?.status : 404,
-      error: response?.data?.message ? response?.data?.message : message,
-    };
-  }
-};
-
 export const uploadImage = async (params = {}, header = {}) => {
   let headers = {
     "Content-Type": "multipart/form-data",
@@ -489,29 +508,29 @@ export const uploadImage = async (params = {}, header = {}) => {
   }
 };
 
-export const getConfiguration = async (params = {}, header = {}) => {
-  let headers = {
-    ...header,
-    Authorization: "Bearer " + localStorage.getItem("token"),
-  };
+// export const getConfiguration = async (params = {}, header = {}) => {
+//   let headers = {
+//     ...header,
+//     Authorization: "Bearer " + localStorage.getItem("token"),
+//   };
 
-  try {
-    const result = await get(`${baseUrl}/seeker/configuration`, {
-      headers,
-    });
+//   try {
+//     const result = await get(`${baseUrl}/seeker/configuration`, {
+//       headers,
+//     });
 
-    if (result?.data) {
-      return result?.data?.data?.Seeker[0];
-    } else {
-      return [];
-    }
-  } catch ({ response, message }) {
-    return {
-      status: response?.status ? response?.status : 404,
-      error: response?.data?.message ? response?.data?.message : message,
-    };
-  }
-};
+//     if (result?.data) {
+//       return result?.data?.data?.Seeker[0];
+//     } else {
+//       return [];
+//     }
+//   } catch ({ response, message }) {
+//     return {
+//       status: response?.status ? response?.status : 404,
+//       error: response?.data?.message ? response?.data?.message : message,
+//     };
+//   }
+// };
 
 export const getSunbirdContent = async (id, header = {}) => {
   let headers = {
@@ -606,72 +625,5 @@ export const getShikshaWithBody = async (id, header = {}) => {
       status: response?.status ? response?.status : 404,
       error: response?.data?.message ? response?.data?.message : message,
     };
-  }
-};
-
-//Job seeker
-
-export const getSelectedJobDetails = async (params = {}, header = {}) => {
-  let headers = {
-    ...header,
-  };
-
-  try {
-    const result = await post(`${baseUrl}/select`, params, {
-      headers,
-    });
-    if (result.data) {
-      return result.data;
-    } else {
-      return {};
-    }
-  } catch ({ response, message }) {
-    return {
-      status: response?.status ? response?.status : 404,
-      error: response?.data?.message ? response?.data?.message : message,
-    };
-  }
-};
-
-export const registerTelementry = async (siteUrl, transactionId) => {
-  localStorage.setItem("transactionId", transactionId);
-  const url = new URL(siteUrl);
-  telementryJson.events[0].ets = Date.now();
-  telementryJson.events[0].transId = transactionId;
-  telementryJson.events[0].actor.id = url.searchParams.get("agent-id") || "";
-
-  telementryJson.events[0].actor.agent = url.searchParams.get("agent")
-    ? url.searchParams.get("agent")
-    : "";
-  telementryJson.events[0].actor.distributor = url.searchParams.get(
-    "distributor-name"
-  )
-    ? url.searchParams.get("distributor-name")
-    : "";
-  telementryJson.events[0].context.channel = url.hostname.split(".")[0];
-  telementryJson.events[0].edata.pageurl = siteUrl;
-  telementryJson.events[0].edata.utm_source = localStorage.getItem("utm_source")
-    ? localStorage.getItem("utm_source")
-    : "";
-
-  try {
-    let response;
-    if (data?.apiEndPoint === "/content/search") {
-      response = post(`${baseUrl}/jobs/telemetry`, telementryJson, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    } else {
-      response = post(`${baseUrl}/content/telemetry`, telementryJson, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    }
-    console.log(telementryJson);
-    console.log(response.data);
-  } catch (error) {
-    console.error("Error:", error);
   }
 };
