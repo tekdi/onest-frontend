@@ -1,24 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
-  Flex,
-  Heading,
-  Text,
-  Input,
   Button,
+  HStack,
+  Heading,
+  Image,
+  Input,
   Modal,
+  Select,
+  Text,
+  VStack,
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  Select,
   ModalFooter,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import { dataConfig } from "./card";
 import axios from "axios";
-
+import InfiniteScroll from "react-infinite-scroll-component";
+import Loading from "./components/Loading";
+const limit = 10;
 const List = () => {
   const [cardData, setCardData] = useState();
   const [filterCardData, setFilterCardData] = useState();
@@ -27,21 +31,87 @@ const List = () => {
   const { type } = useParams();
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [filter, setFilter] = useState();
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const [loadingHeight, setLoadingHeight] = useState(0);
+  const ref = useRef(null);
+  const [bodyHeight, setBodyHeight] = useState(0);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (ref?.current?.clientHeight >= 0 && bodyHeight >= 0) {
+      setLoadingHeight(bodyHeight - ref?.current?.clientHeight);
+    } else {
+      setLoadingHeight(bodyHeight);
+    }
+  }, [bodyHeight, ref]);
+
+  useEffect(() => {
+    const configData = dataConfig[type] || {};
+    if (configData?.getTelemetry) {
+      let telemetry = {
+        eid: "IMPRESSION",
+        ets: 0,
+        ver: 1,
+        mid: "List details",
+
+        actor: {
+          id: "user",
+          type: "",
+        },
+
+        context: {
+          channel: "",
+          pdata: {
+            id: "",
+            pid: "",
+            ver: "",
+            platform: "",
+          },
+          env: "",
+          sid: "",
+          did: "",
+          cdata: [
+            {
+              type: "",
+              id: "",
+            },
+          ],
+        },
+
+        edata: {
+          type: type,
+
+          subtype: "scroll",
+
+          pageid: String, //Required.  Unique page id
+
+          itype: "AUTO",
+
+          stageto: "",
+        },
+      };
+      configData.getTelemetry(type, telemetry);
+    }
+  }, []);
   useEffect(() => {
     const fetchJobsData = async () => {
       try {
         let response;
         const configData = dataConfig[type] || {};
         setConfig(configData);
-        const apiUrl = configData?.apiLink;
-        response = await axios.post(apiUrl, configData?.payload || {});
-        if (configData.apiResponce) {
-          response = configData.apiResponce(response);
+        response = await axios.post(
+          configData?.apiLink_API_LIST_URL ||
+            `${configData?.apiLink_API_BASE_URL}/content/search`,
+          configData?.payload || {}
+        );
+        if (configData.apiResponse) {
+          response = configData.apiResponse(response);
         }
         if (response) {
+          setLoading(false);
           setCardData(response);
-          setFilterCardData(response);
+          setFilterCardData(paginateArray(response, limit, page));
           setfilterData(filterToData(configData?.filters, response));
         } else {
           console.error("Failed to fetch data");
@@ -90,97 +160,190 @@ const List = () => {
     setShowFiltersModal(true);
   };
 
+  const fetchData = () => {
+    // Simulating fetching data from an API
+    // In real application, replace this with actual API call
+
+    // Increment page number
+    const newPage = page + 1;
+    setPage(newPage);
+
+    // Update state with new data
+    setFilterCardData((e) => [
+      ...(e || []),
+      ...paginateArray(cardData, limit, newPage),
+    ]);
+
+    // In this example, let's assume we have only 5 pages of data
+    if (newPage >= Math.ceil(cardData?.length / limit)) {
+      setHasMore(false);
+    }
+  };
+
   return (
-    <Box p="4">
-      <Flex justify="space-between" align="center" mb="4">
-        <Input
-          type="text"
-          placeholder="Search by name..."
-          onChange={(e) =>
-            handleFilter(config?.searchByKey || "title", e.target.value)
-          }
-        />
-        <Button colorScheme="gray" onClick={handleOpenModal} ml={1}>
-          Filters
-        </Button>
-      </Flex>
-      <Modal
-        isOpen={showFiltersModal}
-        onClose={(e) => setShowFiltersModal(false)}
-      >
-        <ModalOverlay />
-        <ModalContent m={2}>
-          <ModalHeader>Apply Filters</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {filterData &&
-              Object.entries(filterData).map(([heading, options]) => {
-                return (
-                  <Box key={heading} mb="4">
-                    <Heading size="sm" mb="2">
-                      {heading}
-                    </Heading>
-                    {Array.isArray(options) && (
-                      <Select
-                        placeholder={`Select ${heading}`}
-                        onChange={(e) => handleFilter(heading, e.target.value)}
-                        value={filter?.[heading] || ""}
-                      >
-                        {options.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </Select>
-                    )}
-                  </Box>
-                );
-              })}
-          </ModalBody>
-          <ModalFooter>
+    <div getBodyHeight={(e) => setBodyHeight(e)}>
+      {loading ? (
+        <Loading />
+      ) : (
+        <>
+          <HStack justify="space-between" align="center" p="4" ref={ref}>
+            <Input
+              flex={11}
+              type="text"
+              placeholder="Search by name..."
+              onChange={(e) =>
+                handleFilter(config?.searchByKey || "title", e.target.value)
+              }
+            />
             <Button
+              flex="1"
               colorScheme="gray"
-              onClick={(e) => setShowFiltersModal(false)}
+              onClick={handleOpenModal}
+              ml={1}
             >
-              Apply
+              Filters
             </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <Flex flexWrap="wrap">
-        {filterCardData?.map((e) => (
-          <RenderCards key={e} obj={e} config={config} />
-        ))}
-      </Flex>
-    </Box>
+          </HStack>
+          <Modal
+            isOpen={showFiltersModal}
+            onClose={(e) => setShowFiltersModal(false)}
+            isCentered
+          >
+            <ModalOverlay />
+            <ModalContent m={2}>
+              <ModalHeader>Apply Filters</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                {filterData &&
+                  Object.entries(filterData)?.map(([heading, options]) => {
+                    return (
+                      <Box key={heading} mb="4">
+                        <Heading size="sm" mb="2">
+                          {heading}
+                        </Heading>
+                        {Array.isArray(options) && (
+                          <Select
+                            placeholder={`Select ${heading}`}
+                            onChange={(e) =>
+                              handleFilter(heading, e.target.value)
+                            }
+                            value={filter?.[heading] || ""}
+                          >
+                            {options?.map(
+                              (option) =>
+                                option.constructor.name == "String" && (
+                                  <option
+                                    key={option}
+                                    value={option}
+                                    label={option}
+                                    _text={{ fontSize: 12, fontWeight: 500 }}
+                                  />
+                                )
+                            )}
+                          </Select>
+                        )}
+                      </Box>
+                    );
+                  })}
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  colorScheme="gray"
+                  onClick={(e) => setShowFiltersModal(false)}
+                >
+                  Apply
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+          <VStack flexWrap="wrap" space={4}>
+            <InfiniteScroll
+              dataLength={filterCardData?.length || 0}
+              next={fetchData}
+              hasMore={hasMore}
+              loader={<h4>Loading...</h4>}
+              endMessage={<p>No more items</p>}
+              height={loadingHeight}
+              gap="10px"
+            >
+              <VStack space="4" alignContent="center" p="4">
+                {filterCardData?.map((e) => (
+                  <RenderCards key={e} obj={e} config={config} />
+                ))}
+              </VStack>
+            </InfiniteScroll>
+          </VStack>
+        </>
+      )}
+    </div>
   );
 };
 
 const RenderCards = ({ obj, config }) => {
   const navigate = useNavigate();
   return (
-    <button
+    <HStack
+      cursor={"pointer"}
+      width={"100%"}
+      height={"100%"}
+      p={10}
+      borderWidth="1px"
+      borderRadius="md"
       onClick={(e) => {
         if (obj?.detailLink) {
-          navigate(replaceUrlParam(config?.detailLink.replase, obj));
+          navigate(replaceUrlParam(config?.detailLink, obj));
         } else {
           if (obj?.id) {
-            navigate(`/${config?.listLink}/${obj?.id}`);
+            navigate(`/${config?.listLink}/${obj?.item_id}`);
           }
         }
       }}
+      textAlign={"center"}
     >
       {config?.render ? (
         config.render(obj)
       ) : (
-        <Box p="4" borderWidth="1px" borderRadius="md" m="2" width="300px">
-          <Heading as="h2" size="md" mb="2">
+        <VStack space={4}>
+          {obj?.image_url && (
+            <Image
+              alignSelf={"center"}
+              source={{ uri: obj?.image_url }}
+              width={"auto"}
+              height={40}
+              src={obj?.image_url}
+              alt={"no IMAGE"}
+            />
+          )}
+          <Text marginLeft={1} fontSize={["xl", "2xl", "3xl"]}>
             {obj?.title}
-          </Heading>
-          <Text fontSize="md">{obj?.description}</Text>
-        </Box>
+          </Text>
+          {obj?.provider_name && (
+            <Text
+              color="gray.700"
+              marginTop={"3"}
+              fontWeight={600}
+              marginLeft={1}
+              fontSize={["sm", "md"]}
+            >
+              <strong>Published By:</strong> {obj?.provider_name}
+            </Text>
+          )}
+          <Text
+            color="gray.700"
+            fontSize={["xs", "sm"]}
+            marginLeft={0.5}
+            textOverflow="ellipsis"
+          >
+            <strong>Description:</strong>{" "}
+            {obj.shortDescription
+              ? obj.shortDescription
+              : obj.description
+              ? obj.description.substring(0, 100) + "..."
+              : ""}
+          </Text>
+        </VStack>
       )}
-    </button>
+    </HStack>
   );
 };
 
@@ -191,8 +354,8 @@ const replaceUrlParam = (url, object) => {
 
 const filterToData = (data, arr) => {
   let result = {};
-  arr.forEach((item) => {
-    data.forEach((key) => {
+  arr?.forEach((item) => {
+    data?.forEach((key) => {
       if (item?.[key]) {
         const countData = result?.[key]?.indexOf(item?.[key]);
         if (!countData || countData < 1) {
@@ -204,4 +367,32 @@ const filterToData = (data, arr) => {
   return result;
 };
 
-export default DisplayData;
+const paginateArray = (dataArray, itemsPerPage, pageNumber) => {
+  const paginatedArrays = [];
+  let currentPage = [];
+
+  dataArray.forEach((item) => {
+    if (currentPage.length === itemsPerPage) {
+      paginatedArrays.push([...currentPage]);
+      currentPage = [];
+    }
+    currentPage.push(item);
+  });
+
+  if (currentPage.length > 0) {
+    paginatedArrays.push([...currentPage]);
+  }
+
+  const currentPageNumber = Math.min(
+    Math.max(1, pageNumber),
+    paginatedArrays.length
+  );
+
+  return paginatedArrays[currentPageNumber - 1] || [];
+  return {
+    currentPage: currentPageNumber,
+    paginatedArray: paginatedArrays[currentPageNumber - 1],
+  };
+};
+
+export default List;

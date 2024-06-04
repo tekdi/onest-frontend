@@ -1,22 +1,28 @@
-import { Box, Button, Divider, HStack, Icon, Text } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import Loading from "../components/Loading";
+import {
+  Alert,
+  Box,
+  Button,
+  Divider,
+  HStack,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import ReactGA from "react-ga4";
 import { useTranslation } from "react-i18next";
-import { MdLocationPin } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { v4 as uuidv4 } from "uuid";
-import { registerTelementry } from "../api/Apicall";
-import Loader from "./Loader";
-import "./Shared.css";
+// import { registerTelementry } from "../api/Apicall";
 import { dataConfig } from "../card";
+import OrderSuccessModal from "./OrderSuccessModal";
+import "./Shared.css";
+import { getTrackData, statusTrack } from "../../Services/APIcalls/apicalls";
+import axios from "axios";
 
-function JobDetails() {
-  const { type } = useParams();
-  
-  const baseUrl = dataConfig[type].apiLink_API_BASE_URL
-
+function ScholarshipView() {
+  const { type, jobId } = useParams();
+  const baseUrl = dataConfig[type].apiLink_API_BASE_URL;
   const db_cache = dataConfig[type].apiLink_DB_CACHE;
   const envConfig = dataConfig[type];
 
@@ -27,37 +33,201 @@ function JobDetails() {
   const { t } = useTranslation();
   const [jobInfo, setJobInfo] = useState(state?.product);
   const [jobsData, setJobsData] = useState(null);
+  const [listData, setListData] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
   const [jobDetails, setJobDetails] = useState(null);
-  const { jobId } = useParams();
+  const [status, setStatus] = useState("Applied");
   const [siteUrl] = useState(window.location.href);
   const [transactionId] = useState(uuidv4());
+  const toast = useToast();
 
-  // const uniqueId = uuidv4();
+  useEffect(() => {
+    const configData = dataConfig[type] || {};
+    if (configData?.getTelemetry) {
+      let telemetry = {
+        eid: "IMPRESSION",
+        ets: 0,
+        ver: 1,
+        mid: "Scholarship List details",
 
-  //   useEffect(() => {
-  //     if (transactionId === undefined) {
-  //       const uniqueId = uuidv4();
-  //       settransactionId(uniqueId); // Update state only when necessary
-  //     }else{
-  //       registerTelementry(siteUrl, transactionId);
-  //     }
-  // }, [transactionId]);
+        actor: {
+          id: "user",
+          type: "",
+        },
 
-  //const jobsData  = selectJson?.responses[0]?.message?.order?.items[0]
-  //console.log(jobsData);
+        context: {
+          channel: "",
+          pdata: {
+            id: "",
+            pid: "",
+            ver: "",
+            platform: "",
+          },
+          env: "",
+          sid: "",
+          did: "",
+          cdata: [
+            {
+              type: "",
+              id: "",
+            },
+          ],
+        },
+
+        edata: {
+          type: type,
+
+          subtype: "scroll",
+
+          pageid: String, //Required.  Unique page id
+
+          itype: "AUTO",
+
+          stageto: "",
+        },
+      };
+      configData.getTelemetry(type, telemetry);
+    }
+  }, []);
+  const closeModal = () => {
+    setOpenModal(false);
+    navigate("/");
+  };
+
+  const getApplicationStatus = async (order_id) => {
+    const apiUrl = `${baseUrl}/content/searchOrder/${order_id}`;
+
+    try {
+      await axios
+        .get(apiUrl)
+        .then(async (response) => {
+          try {
+            const payload = {
+              context: {
+                domain: envConfig.apiLink_DOMAIN,
+                action: "status",
+                version: "1.1.0",
+                bap_id: envConfig.apiLink_BAP_ID,
+                bap_uri: envConfig.apiLink_BAP_URI,
+                bpp_id: response?.data?.bpp_id,
+                bpp_uri: response?.data?.bpp_uri,
+                transaction_id: transactionId,
+                message_id: uuidv4(),
+                timestamp: new Date().toISOString(),
+              },
+              message: {
+                order_id: order_id,
+              },
+            };
+            const res = await statusTrack(payload);
+            if (res?.responses[0]?.message) {
+              setStatus(
+                res?.responses[0]?.message?.order?.fulfillments[0]?.state
+                  ?.descriptor?.name
+              );
+            }
+          } catch (e) {
+            console.error(
+              "Error constructing payload or handling response:",
+              e
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Axios GET request error:", error);
+        });
+    } catch (error) {
+      console.log("error ::", error);
+    }
+
+    setOpenModal(true);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const userDataDetails = localStorage.getItem("userData");
+      const userData = JSON.parse(userDataDetails);
+      const data = {
+        context: type,
+        context_item_id: jobId,
+        user_id: userData.user_id,
+      };
+      let result = await getTrackData({ filters: data });
+      if (result?.data.length) {
+        setListData(result?.data);
+        getApplicationStatus(result?.data[0].order_id);
+      }
+    };
+    fetchData();
+  }, []);
+
   function errorMessage(message) {
-    toast.error(message, {
-      position: toast.POSITION.BOTTOM_CENTER,
-      autoClose: 5000,
-      hideProgressBar: false,
-      theme: "colored",
+    toast.show({
+      duration: 5000,
       pauseOnHover: true,
-      toastClassName: "full-width-toast",
+      variant: "solid",
+      render: () => {
+        return (
+          <Alert w="100%" status={"error"}>
+            <HStack space={2} alignItems={"center"}>
+              <Alert.Icon color={type} />
+              <Text color={type}>{message}</Text>
+            </HStack>
+          </Alert>
+        );
+      },
     });
   }
 
   const trackReactGA = () => {
     console.log("User clicked the Apply button");
+    let telemetry = {
+      eid: "Interact",
+      ets: 0,
+      ver: 1,
+      mid: "User clicked the Apply button",
+
+      actor: {
+        id: "user",
+        type: "",
+      },
+
+      context: {
+        channel: "",
+        pdata: {
+          id: "",
+          pid: "",
+          ver: "",
+          platform: "",
+        },
+        env: "",
+        sid: "",
+        did: "",
+        cdata: [
+          {
+            type: "",
+            id: "",
+          },
+        ],
+      },
+
+      edata: {
+        type: type,
+
+        subtype: "scroll",
+
+        pageid: String, //Required.  Unique page id
+
+        itype: "AUTO",
+
+        stageto: "",
+      },
+    };
+    const configData = dataConfig[type] || {};
+    if (configData?.getTelemetry) {
+      configData.getTelemetry("apply", telemetry);
+    }
+
     ReactGA.event({
       category: "Button Click",
       action: "apply_Button",
@@ -76,11 +246,11 @@ function JobDetails() {
         },
         body: JSON.stringify({
           context: {
-            domain: envConfig.VITE_DOMAIN,
+            domain: envConfig.apiLink_DOMAIN,
             action: "select",
             version: "1.1.0",
-            bap_id: envConfig.VITE_BAP_ID,
-            bap_uri: envConfig.VITE_BAP_URI,
+            bap_id: envConfig.apiLink_BAP_ID,
+            bap_uri: envConfig.apiLink_BAP_URI,
             bpp_id: jobInfo?.bpp_id,
             bpp_uri: jobInfo?.bpp_uri,
             transaction_id: transactionId, // (transactionId === undefined) ? localStorage.getItem('transactionId') : transactionId,
@@ -103,15 +273,16 @@ function JobDetails() {
       });
 
       const data = await response.json();
-      data["context"]["message_id"] = transactionId;
-      setJobDetails(data);
-      setJobsData(data?.responses[0]?.message?.order?.items[0]);
-      localStorage.setItem("selectRes", JSON.stringify(data));
       if (!data?.responses.length) {
         errorMessage(
           t("Delay_in_fetching_the_details") + "(" + transactionId + ")"
         );
+      } else {
+        setJobsData(data?.responses[0]?.message?.order?.items[0]);
+        localStorage.setItem("selectRes", JSON.stringify(data));
       }
+      data["context"]["message_id"] = transactionId;
+      setJobDetails(data);
     } catch (error) {
       console.error("Error fetching job details:", error);
     } finally {
@@ -169,7 +340,7 @@ function JobDetails() {
       registerTelementry(siteUrl, transactionId);
     }*/
 
-    registerTelementry(siteUrl, transactionId);
+    // registerTelementry(siteUrl, transactionId);
 
     // ReactGA.pageview(window.location.pathname + window.location.search);
     var requestOptions = {
@@ -186,21 +357,24 @@ function JobDetails() {
         result = JSON.parse(result);
         setJobInfo(result?.data[db_cache][0]);
         if (transactionId !== undefined) {
-          console.log(transactionId);
           fetchJobDetails(result?.data[db_cache][0]);
         }
       })
       .catch((error) => console.log("error", error));
   }, [transactionId]); // Runs only once when the component mounts
 
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <div>
       <Box
         fontFamily={"Alice"}
-        marginTop={100}
+        marginTop={50}
         padding={4}
         borderRadius={15}
-        backgroundColor={"white"}
+        backgroundColor={"#246DDC1A"}
         marginLeft={4}
         marginRight={4}
       >
@@ -232,12 +406,6 @@ function JobDetails() {
           <HStack marginTop={"1"} marginLeft={1}>
             {(jobInfo?.city || jobInfo?.state) && (
               <div style={{ display: "flex" }}>
-                <Icon
-                  as={MdLocationPin}
-                  boxSize={4}
-                  marginTop={1}
-                  marginRight={1}
-                />{" "}
                 <Text fontSize={["xs", "sm"]}>{jobInfo?.city}</Text>
                 {jobInfo?.city && jobInfo?.state ? (
                   <Text fontSize={["xs", "sm"]}>, {jobInfo?.state}</Text>
@@ -280,112 +448,118 @@ function JobDetails() {
           display="flex"
           justifyContent={["center", "flex-start"]}
         >
-          <Button
-            marginTop={2}
-            marginRight={[0, 5]}
-            width={["100%", 200]}
-            colorScheme="blue"
-            variant="solid"
-            backgroundColor="blue.500"
-            color="white"
-            onClick={() => {
-              navigate("/automatedForm/" + jobId + "/" + transactionId, {
-                state: {
-                  jobDetails: jobDetails,
-                },
-              });
-              trackReactGA();
-            }}
-          >
-            {t("Apply")}
-          </Button>
+          {listData.length ? (
+            <OrderSuccessModal
+              isOpen={openModal}
+              onClose={closeModal}
+              orderId={status}
+              applied={true}
+            />
+          ) : (
+            <Button
+              marginTop={2}
+              marginRight={[0, 5]}
+              width={["100%", 200]}
+              colorScheme="blue"
+              variant="solid"
+              backgroundColor="blue.500"
+              color="white"
+              onClick={() => {
+                navigate(
+                  `/${envConfig?.listLink}/automatedForm/${jobId}/${transactionId}`,
+                  {
+                    state: {
+                      jobDetails: jobDetails,
+                    },
+                  }
+                );
+                trackReactGA();
+              }}
+            >
+              {t("Apply")}
+            </Button>
+          )}
         </Box>
       </Box>
 
-      {loading ? (
-        <Loader />
-      ) : (
-        <Box
-          fontFamily={"Alice"}
-          marginLeft={4}
-          marginRight={4}
-          padding={4}
-          marginTop={5}
-          borderRadius={15}
-          backgroundColor={"white"}
-        >
-          <Text fontSize={16} fontWeight={700}>
-            {t("Job_Description")}
-          </Text>
+      <Box
+        fontFamily={"Alice"}
+        marginLeft={4}
+        marginRight={4}
+        padding={4}
+        marginTop={5}
+        borderRadius={15}
+        backgroundColor={"#246DDC1A"}
+      >
+        <Text fontSize={16} fontWeight={700}>
+          {t("Scholarship_Description")}
+        </Text>
 
-          {jobInfo?.description ? (
-            <Text marginTop={2} fontSize={["xs", "sm"]} color={"gray.700"}>
-              {" "}
-              {jobInfo?.description}{" "}
-            </Text>
-          ) : (
-            <Text marginTop={2} fontSize={["xs", "sm"]} color={"gray.700"}>
-              {" "}
-              {t("Job_description_is_not_available")}{" "}
-            </Text>
-          )}
-          <Box marginTop={4}>
-            {jobsData?.tags?.map((tag, index) => (
-              <Box key={index} marginBottom={3}>
-                <Text fontSize={["sm"]} color={"black"} fontWeight={700}>
-                  {tag.descriptor.name}
-                </Text>
-                {tag.list.map((item, itemIndex) => (
-                  <div key={itemIndex}>
-                    <ul style={{ marginLeft: "3rem", listStyleType: "disc" }}>
-                      <li>
-                        {!item?.descriptor?.name &&
-                          item?.descriptor?.code &&
-                          item?.value !== "" && (
-                            <Text fontSize={["xs", "sm"]} color="gray.700">
-                              {item?.descriptor?.code}
+        {jobInfo?.description ? (
+          <Text marginTop={2} fontSize={["xs", "sm"]} color={"gray.700"}>
+            {jobInfo?.description}{" "}
+          </Text>
+        ) : (
+          <Text marginTop={2} fontSize={["xs", "sm"]} color={"gray.700"}>
+            {t("Scholarship_description_is_not_available")}{" "}
+          </Text>
+        )}
+        <Box marginTop={4}>
+          {jobsData?.tags?.map((tag, index) => (
+            <Box key={index} marginBottom={3}>
+              <Text fontSize={["sm"]} color={"black"} fontWeight={700}>
+                {tag.descriptor.name}
+              </Text>
+              {tag.list.map((item, itemIndex) => (
+                <div key={itemIndex}>
+                  <ul style={{ marginLeft: "3rem", listStyleType: "disc" }}>
+                    <li>
+                      {!item?.descriptor?.name &&
+                        item?.descriptor?.code &&
+                        item?.value !== "" && (
+                          <Text fontSize={["xs", "sm"]} color="gray.700">
+                            {item?.descriptor?.code}
+                          </Text>
+                        )}
+
+                      {item?.descriptor?.name &&
+                      item?.value &&
+                      item?.value !== "null" &&
+                      item?.value !== null ? (
+                        <Box display="flex">
+                          {item?.descriptor?.name && (
+                            <Text
+                              fontSize={["xs", "sm"]}
+                              color="gray.900"
+                              marginRight={2}
+                            >
+                              {item?.descriptor?.name}:
                             </Text>
                           )}
-
-                        {item?.descriptor?.name &&
-                        item?.value &&
-                        item?.value !== "null" &&
-                        item?.value !== null ? (
-                          <Box display="flex">
-                            {item?.descriptor?.name && (
-                              <Text
-                                fontSize={["xs", "sm"]}
-                                color="gray.900"
-                                marginRight={2}
-                              >
-                                {item?.descriptor?.name}:
-                              </Text>
-                            )}
-                            {item?.value && (
-                              <Text fontSize={["xs", "sm"]} color="gray.700">
-                                {item?.value}
-                              </Text>
-                            )}
-                          </Box>
-                        ) : (
-                          <div>
+                          {item?.value && (
                             <Text fontSize={["xs", "sm"]} color="gray.700">
-                              {t("Not_Provided")}
+                              {item?.value}
                             </Text>
-                          </div>
-                        )}
-                      </li>
-                    </ul>
-                  </div>
-                ))}
-                <Divider my={2} borderWidth="0.5px" />
-              </Box>
-            ))}
-          </Box>
+                          )}
+                        </Box>
+                      ) : (
+                        <div>
+                          <Text fontSize={["xs", "sm"]} color="gray.700">
+                            {t("Not_Provided")}
+                          </Text>
+                        </div>
+                      )}
+                    </li>
+                  </ul>
+                </div>
+              ))}
+              <Divider my={2} borderWidth="0.5px" />
+            </Box>
+          ))}
         </Box>
-      )}
+      </Box>
     </div>
   );
 }
 
-export default JobDetails;
+export default ScholarshipView;
