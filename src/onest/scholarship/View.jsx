@@ -14,8 +14,8 @@ import { dataConfig } from "../card";
 
 function JobDetails() {
   const { type } = useParams();
-  
-  const baseUrl = dataConfig[type].apiLink_API_BASE_URL
+
+  const baseUrl = dataConfig[type].apiLink_API_BASE_URL;
 
   const db_cache = dataConfig[type].apiLink_DB_CACHE;
   const envConfig = dataConfig[type];
@@ -45,6 +45,56 @@ function JobDetails() {
 
   //const jobsData  = selectJson?.responses[0]?.message?.order?.items[0]
   //console.log(jobsData);
+
+  useEffect(() => {
+    const configData = dataConfig[type] || {};
+    if (configData?.getTelemetry) {
+      let telemetry = {
+        eid: "IMPRESSION",
+        ets: 0,
+        ver: 1,
+        mid: "Scholarship List details",
+
+        actor: {
+          id: "user",
+          type: "",
+        },
+
+        context: {
+          channel: "",
+          pdata: {
+            id: "",
+            pid: "",
+            ver: "",
+            platform: "",
+          },
+          env: "",
+          sid: "",
+          did: "",
+          cdata: [
+            {
+              type: "",
+              id: "",
+            },
+          ],
+        },
+
+        edata: {
+          type: type,
+
+          subtype: "scroll",
+
+          pageid: String, //Required.  Unique page id
+
+          itype: "AUTO",
+
+          stageto: "",
+        },
+      };
+      configData.getTelemetry(type, telemetry);
+    }
+  }, []);
+
   function errorMessage(message) {
     toast.error(message, {
       position: toast.POSITION.BOTTOM_CENTER,
@@ -58,6 +108,52 @@ function JobDetails() {
 
   const trackReactGA = () => {
     console.log("User clicked the Apply button");
+    let telemetry = {
+      eid: "Interact",
+      ets: 0,
+      ver: 1,
+      mid: "User clicked the Apply button",
+
+      actor: {
+        id: "user",
+        type: "",
+      },
+
+      context: {
+        channel: "",
+        pdata: {
+          id: "",
+          pid: "",
+          ver: "",
+          platform: "",
+        },
+        env: "",
+        sid: "",
+        did: "",
+        cdata: [
+          {
+            type: "",
+            id: "",
+          },
+        ],
+      },
+
+      edata: {
+        type: type,
+
+        subtype: "scroll",
+
+        pageid: String, //Required.  Unique page id
+
+        itype: "AUTO",
+
+        stageto: "",
+      },
+    };
+    const configData = dataConfig[type] || {};
+    if (configData?.getTelemetry) {
+      configData.getTelemetry("Apply", telemetry);
+    }
     ReactGA.event({
       category: "Button Click",
       action: "apply_Button",

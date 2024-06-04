@@ -597,6 +597,52 @@ const AutomatedForm = () => {
   }, []);
 
   const trackReactGA = () => {
+    let telemetry = {
+      eid: "Interact",
+      ets: 0,
+      ver: 1,
+      mid: "User clicked the Submit button",
+
+      actor: {
+        id: "user",
+        type: "",
+      },
+
+      context: {
+        channel: "",
+        pdata: {
+          id: "",
+          pid: "",
+          ver: "",
+          platform: "",
+        },
+        env: "",
+        sid: "",
+        did: "",
+        cdata: [
+          {
+            type: "",
+            id: "",
+          },
+        ],
+      },
+
+      edata: {
+        type: type,
+
+        subtype: "scroll",
+
+        pageid: String, //Required.  Unique page id
+
+        itype: "AUTO",
+
+        stageto: "",
+      },
+    };
+    const configData = dataConfig[type] || {};
+    if (configData?.getTelemetry) {
+      configData.getTelemetry("Submit", telemetry);
+    }
     ReactGA.event({
       category: "Button Click",
       action: "submit_form",

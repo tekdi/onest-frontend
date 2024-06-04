@@ -1,11 +1,56 @@
 import { Box, Flex, Heading, Image } from "@chakra-ui/react";
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { dataConfig } from "./card";
+import React, { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { dataConfig, landingTelemetry } from "./card";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { type } = useParams();
+  useEffect(() => {
+    let telemetry = {
+      eid: "IMPRESSION",
+      ets: 0,
+      ver: 1,
+      mid: "Card list",
 
+      actor: {
+        id: "user",
+        type: "",
+      },
+
+      context: {
+        channel: "",
+        pdata: {
+          id: "",
+          pid: "",
+          ver: "",
+          platform: "",
+        },
+        env: "",
+        sid: "",
+        did: "",
+        cdata: [
+          {
+            type: "",
+            id: "",
+          },
+        ],
+      },
+
+      edata: {
+        type: type,
+
+        subtype: "scroll",
+
+        pageid: String, //Required.  Unique page id
+
+        itype: "AUTO",
+
+        stageto: "",
+      },
+    };
+    landingTelemetry.getTelemetry("show types", telemetry);
+  }, []);
   const FeatureCard = ({ title, onClick, imageUrl }) => {
     return (
       <Flex
@@ -34,6 +79,53 @@ const LandingPage = () => {
   };
 
   const handleCardClick = async (title) => {
+    let type = title.toString().toLowerCase();
+    const configData = dataConfig[title] || {};
+    let telemetry = {
+      eid: "Interact",
+      ets: 0,
+      ver: 1,
+      mid: "Select option" + " " + title,
+
+      actor: {
+        id: "user",
+        type: "",
+      },
+
+      context: {
+        channel: "",
+        pdata: {
+          id: "",
+          pid: "",
+          ver: "",
+          platform: "",
+        },
+        env: "",
+        sid: "",
+        did: "",
+        cdata: [
+          {
+            type: "",
+            id: "",
+          },
+        ],
+      },
+
+      edata: {
+        type: type,
+
+        subtype: "scroll",
+
+        pageid: String, //Required.  Unique page id
+
+        itype: "AUTO",
+
+        stageto: "",
+      },
+    };
+    if (configData?.getTelemetry) {
+      configData.getTelemetry("select type", telemetry);
+    }
     try {
       navigate(`/${title}`);
     } catch (error) {

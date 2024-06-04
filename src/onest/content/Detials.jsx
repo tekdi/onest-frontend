@@ -22,7 +22,7 @@ const Details = () => {
     state?.transactionId || uuidv4()
   );
   const messageId = uuidv4();
-  const { itemId } = useParams();
+  const { type, itemId } = useParams();
 
   useEffect(() => {
     if (state && state.product) {
@@ -113,6 +113,52 @@ const Details = () => {
   console.log("itemId:", state.product?.item_id);
 
   const handleSubscribe = () => {
+    let telemetry = {
+      eid: "Interact",
+      ets: 0,
+      ver: 1,
+      mid: "User clicked the subscribe button",
+
+      actor: {
+        id: "user",
+        type: "",
+      },
+
+      context: {
+        channel: "",
+        pdata: {
+          id: "",
+          pid: "",
+          ver: "",
+          platform: "",
+        },
+        env: "",
+        sid: "",
+        did: "",
+        cdata: [
+          {
+            type: "",
+            id: "",
+          },
+        ],
+      },
+
+      edata: {
+        type: type,
+
+        subtype: "scroll",
+
+        pageid: String, //Required.  Unique page id
+
+        itype: "AUTO",
+
+        stageto: "",
+      },
+    };
+    const configData = dataConfig[type] || {};
+    if (configData?.getTelemetry) {
+      configData.getTelemetry("Subscibe", telemetry);
+    }
     navigate(`/form`, {
       // Navigate to UserDetailsForm.jsx
       state: {
