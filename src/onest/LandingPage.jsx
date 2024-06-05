@@ -5,6 +5,7 @@ import { dataConfig, landingTelemetry } from "./card";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  //remove telemetry
 
   const FeatureCard = ({ title, onClick, imageUrl }) => {
     return (

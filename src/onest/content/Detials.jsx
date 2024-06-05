@@ -113,6 +113,7 @@ const Details = () => {
   console.log("itemId:", state.product?.item_id);
 
   const handleSubscribe = () => {
+    //remove telemetry
     navigate(`/form`, {
       // Navigate to UserDetailsForm.jsx
       state: {

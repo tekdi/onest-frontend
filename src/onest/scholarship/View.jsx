@@ -31,7 +31,7 @@ function JobDetails() {
   const { jobId } = useParams();
   const [siteUrl] = useState(window.location.href);
   const [transactionId] = useState(uuidv4());
-
+  //remove telemetry
   // const uniqueId = uuidv4();
 
   //   useEffect(() => {

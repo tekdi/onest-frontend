@@ -16,6 +16,7 @@ export const dataConfig = {
 
     imageUrl: "",
     apiResponce: (e) => e.data.data.scholarship_cache,
+    //remove telemetry
   },
 
   jobs: {

@@ -27,7 +27,7 @@ const List = () => {
   const { type } = useParams();
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [filter, setFilter] = useState();
-
+  //remove telemetry
   useEffect(() => {
     const fetchJobsData = async () => {
       try {
