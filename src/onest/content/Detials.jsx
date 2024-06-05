@@ -22,7 +22,7 @@ const Details = () => {
     state?.transactionId || uuidv4()
   );
   const messageId = uuidv4();
-  const { itemId } = useParams();
+  const { type, itemId } = useParams();
 
   useEffect(() => {
     if (state && state.product) {
@@ -113,6 +113,7 @@ const Details = () => {
   console.log("itemId:", state.product?.item_id);
 
   const handleSubscribe = () => {
+    //remove telemetry
     navigate(`/form`, {
       // Navigate to UserDetailsForm.jsx
       state: {

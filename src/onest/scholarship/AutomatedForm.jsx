@@ -597,6 +597,7 @@ const AutomatedForm = () => {
   }, []);
 
   const trackReactGA = () => {
+    //remove telemetry
     ReactGA.event({
       category: "Button Click",
       action: "submit_form",

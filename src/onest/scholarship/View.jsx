@@ -14,8 +14,8 @@ import { dataConfig } from "../card";
 
 function JobDetails() {
   const { type } = useParams();
-  
-  const baseUrl = dataConfig[type].apiLink_API_BASE_URL
+
+  const baseUrl = dataConfig[type].apiLink_API_BASE_URL;
 
   const db_cache = dataConfig[type].apiLink_DB_CACHE;
   const envConfig = dataConfig[type];
@@ -31,7 +31,7 @@ function JobDetails() {
   const { jobId } = useParams();
   const [siteUrl] = useState(window.location.href);
   const [transactionId] = useState(uuidv4());
-
+  //remove telemetry
   // const uniqueId = uuidv4();
 
   //   useEffect(() => {
@@ -45,6 +45,7 @@ function JobDetails() {
 
   //const jobsData  = selectJson?.responses[0]?.message?.order?.items[0]
   //console.log(jobsData);
+
   function errorMessage(message) {
     toast.error(message, {
       position: toast.POSITION.BOTTOM_CENTER,
@@ -58,6 +59,7 @@ function JobDetails() {
 
   const trackReactGA = () => {
     console.log("User clicked the Apply button");
+
     ReactGA.event({
       category: "Button Click",
       action: "apply_Button",

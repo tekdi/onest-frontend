@@ -1,10 +1,11 @@
 import { Box, Flex, Heading, Image } from "@chakra-ui/react";
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { dataConfig } from "./card";
+import React, { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { dataConfig, landingTelemetry } from "./card";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  //remove telemetry
 
   const FeatureCard = ({ title, onClick, imageUrl }) => {
     return (

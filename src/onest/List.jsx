@@ -27,7 +27,7 @@ const List = () => {
   const { type } = useParams();
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [filter, setFilter] = useState();
-
+  //remove telemetry
   useEffect(() => {
     const fetchJobsData = async () => {
       try {
@@ -158,6 +158,7 @@ const List = () => {
 
 const RenderCards = ({ obj, config }) => {
   const navigate = useNavigate();
+  const { type } = useParams();
   return (
     <button
       onClick={(e) => {
@@ -204,4 +205,4 @@ const filterToData = (data, arr) => {
   return result;
 };
 
-export default DisplayData;
+export default List;
