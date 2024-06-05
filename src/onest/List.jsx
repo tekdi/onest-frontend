@@ -80,52 +80,6 @@ const List = () => {
   }, [filter]);
 
   const handleFilter = (key, value) => {
-    const configData = dataConfig[type] || {};
-    if (configData?.getTelemetry) {
-      let telemetry = {
-        eid: "Search",
-        ets: 0,
-        ver: 1,
-        mid: type + " " + "Filter select",
-
-        actor: {
-          id: "user",
-          type: "",
-        },
-
-        context: {
-          channel: "",
-          pdata: {
-            id: "",
-            pid: "",
-            ver: "",
-            platform: "",
-          },
-          env: "",
-          sid: "",
-          did: "",
-          cdata: [
-            {
-              type: "",
-              id: "",
-            },
-          ],
-        },
-
-        edata: {
-          type: type,
-
-          subtype: "scroll",
-
-          pageid: String, //Required.  Unique page id
-
-          itype: "AUTO",
-
-          stageto: "",
-        },
-      };
-      configData.getTelemetry("Filter", telemetry);
-    }
     setFilter((e) => ({
       ...e,
       [key]: value,
@@ -133,52 +87,6 @@ const List = () => {
   };
 
   const handleOpenModal = () => {
-    const configData = dataConfig[type] || {};
-    if (configData?.getTelemetry) {
-      let telemetry = {
-        eid: "Search",
-        ets: 0,
-        ver: 1,
-        mid: "User clicked the Filter button",
-
-        actor: {
-          id: "user",
-          type: "",
-        },
-
-        context: {
-          channel: "",
-          pdata: {
-            id: "",
-            pid: "",
-            ver: "",
-            platform: "",
-          },
-          env: "",
-          sid: "",
-          did: "",
-          cdata: [
-            {
-              type: "",
-              id: "",
-            },
-          ],
-        },
-
-        edata: {
-          type: type,
-
-          subtype: "scroll",
-
-          pageid: String, //Required.  Unique page id
-
-          itype: "AUTO",
-
-          stageto: "",
-        },
-      };
-      configData.getTelemetry(type, telemetry);
-    }
     setShowFiltersModal(true);
   };
 
@@ -258,52 +166,6 @@ const RenderCards = ({ obj, config }) => {
           navigate(replaceUrlParam(config?.detailLink.replase, obj));
         } else {
           if (obj?.id) {
-            const configData = dataConfig[type] || {};
-            if (configData?.getTelemetry) {
-              let telemetry = {
-                eid: "Assess",
-                ets: 0,
-                ver: 1,
-                mid: "User select" + " " + type,
-
-                actor: {
-                  id: "user",
-                  type: "",
-                },
-
-                context: {
-                  channel: "",
-                  pdata: {
-                    id: "",
-                    pid: "",
-                    ver: "",
-                    platform: "",
-                  },
-                  env: "",
-                  sid: "",
-                  did: "",
-                  cdata: [
-                    {
-                      type: "",
-                      id: "",
-                    },
-                  ],
-                },
-
-                edata: {
-                  type: type,
-
-                  subtype: "scroll",
-
-                  pageid: String, //Required.  Unique page id
-
-                  itype: "AUTO",
-
-                  stageto: "",
-                },
-              };
-              configData.getTelemetry("apply", telemetry);
-            }
             navigate(`/${config?.listLink}/${obj?.id}`);
           }
         }

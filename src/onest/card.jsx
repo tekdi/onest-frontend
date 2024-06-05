@@ -1,9 +1,3 @@
-export const landingTelemetry = {
-  getTelemetry: (type, data) => {
-    console.log(data);
-  },
-};
-
 export const dataConfig = {
   scholarship: {
     title: "Scholarship",
@@ -22,9 +16,6 @@ export const dataConfig = {
 
     imageUrl: "",
     apiResponce: (e) => e.data.data.scholarship_cache,
-    getTelemetry: (type, data) => {
-      console.log(data);
-    },
   },
 
   jobs: {
@@ -54,9 +45,7 @@ export const dataConfig = {
 
     imageUrl: "",
     apiResponce: (e) => e.data.data.jobs_cache,
-    getTelemetry: (type, data) => {
-      console.log(data);
-    },
+
     // render: (e) => {
     //   console.log(e);
     //   return (
@@ -84,9 +73,7 @@ export const dataConfig = {
     apiLink_BASE_URL: "https://onest-fs-bap-client.tekdinext.com",
 
     apiResponce: (e) => e.data.data.kahani_cache,
-    getTelemetry: (type, data) => {
-      console.log(data);
-    },
+
     // apiResponce: ({ data }) => {
     //   let response = [];
     //   //   response = data?.message?.catalog?.providers?.flatMap((e) => e.items);
