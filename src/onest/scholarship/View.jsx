@@ -1,11 +1,19 @@
-import { Box, Button, Divider, HStack, Icon, Text } from "@chakra-ui/react";
+import {
+  Alert,
+  AlertIcon,
+  Box,
+  Button,
+  Divider,
+  HStack,
+  Icon,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import ReactGA from "react-ga4";
 import { useTranslation } from "react-i18next";
 import { MdLocationPin } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { v4 as uuidv4 } from "uuid";
 import { registerTelementry } from "../api/Apicall";
 import Loader from "./Loader";
@@ -32,6 +40,7 @@ function JobDetails() {
   const [siteUrl] = useState(window.location.href);
   const [transactionId] = useState(uuidv4());
   //remove telemetry
+  const toast = useToast();
   // const uniqueId = uuidv4();
 
   //   useEffect(() => {
@@ -46,16 +55,22 @@ function JobDetails() {
   //const jobsData  = selectJson?.responses[0]?.message?.order?.items[0]
   //console.log(jobsData);
 
-  function errorMessage(message) {
-    toast.error(message, {
-      position: toast.POSITION.BOTTOM_CENTER,
-      autoClose: 5000,
-      hideProgressBar: false,
-      theme: "colored",
-      pauseOnHover: true,
-      toastClassName: "full-width-toast",
+  const errorMessage = (message) => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      status: "error",
+      position: "bottom-left",
+      render: () => (
+        <Alert w="100%" status="error" variant="solid">
+          <HStack space={2} alignItems="left">
+            <AlertIcon />
+            <Text>{message}</Text>
+          </HStack>
+        </Alert>
+      ),
     });
-  }
+  };
 
   const trackReactGA = () => {
     console.log("User clicked the Apply button");
@@ -78,14 +93,14 @@ function JobDetails() {
         },
         body: JSON.stringify({
           context: {
-            domain: envConfig.VITE_DOMAIN,
+            domain: envConfig?.apiLink_DOMAIN,
             action: "select",
             version: "1.1.0",
-            bap_id: envConfig.VITE_BAP_ID,
-            bap_uri: envConfig.VITE_BAP_URI,
+            bap_id: envConfig.apiLink_BAP_ID,
+            bap_uri: envConfig.apiLink_BAP_URI,
             bpp_id: jobInfo?.bpp_id,
             bpp_uri: jobInfo?.bpp_uri,
-            transaction_id: transactionId, // (transactionId === undefined) ? localStorage.getItem('transactionId') : transactionId,
+            transaction_id: transactionId,
             message_id: uuidv4(),
             timestamp: new Date().toISOString(),
           },
@@ -171,7 +186,7 @@ function JobDetails() {
       registerTelementry(siteUrl, transactionId);
     }*/
 
-    registerTelementry(siteUrl, transactionId);
+    //registerTelementry(siteUrl, transactionId);
 
     // ReactGA.pageview(window.location.pathname + window.location.search);
     var requestOptions = {

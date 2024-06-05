@@ -1,5 +1,5 @@
 // AutomatedForm.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useToast } from "react";
 import initReqBodyJson from "../assets/bodyJson/userDetailsBody.json";
 import "./Shared.css";
 import OrderSuccessModal from "./OrderSuccessModal";
@@ -8,8 +8,6 @@ import ReactGA from "react-ga4";
 import { useLocation, useNavigate } from "react-router-dom";
 // import Header from "./Header";
 import Loader from "./Loader";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import themeConfig from "../assets/ui-config/themeConfig.json";
 
 import {
@@ -21,6 +19,9 @@ import {
   Input,
   Textarea,
   Select,
+  Alert,
+  HStack,
+  AlertIcon,
 } from "@chakra-ui/react";
 import { add } from "lodash";
 import { useParams } from "react-router-dom";
@@ -58,6 +59,24 @@ const AutomatedForm = () => {
 
   const { jobId } = useParams();
   const { transactionId } = useParams();
+  const toast = useToast();
+
+  const errorMessage = (message) => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      status: "error",
+      position: "bottom-left",
+      render: () => (
+        <Alert w="100%" status="error" variant="solid">
+          <HStack space={2} alignItems="left">
+            <AlertIcon />
+            <Text>{message}</Text>
+          </HStack>
+        </Alert>
+      ),
+    });
+  };
 
   useEffect(() => {
     const url = window.location.href;
@@ -466,17 +485,6 @@ const AutomatedForm = () => {
       // setLoading(false);
     }
   };
-
-  function errorMessage(message) {
-    toast.error(message, {
-      position: toast.POSITION.BOTTOM_CENTER,
-      autoClose: 5000,
-      hideProgressBar: false,
-      theme: "colored",
-      pauseOnHover: true,
-      toastClassName: "full-width-toast",
-    });
-  }
 
   const fetchInitDetails = async () => {
     let usrtemp = localStorage.getItem("userData");

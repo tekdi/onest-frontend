@@ -1,7 +1,7 @@
 import { Box, Flex, Heading, Image } from "@chakra-ui/react";
-import React, { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { dataConfig, landingTelemetry } from "./card";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { dataConfig } from "./card";
 
 const LandingPage = () => {
   const navigate = useNavigate();
