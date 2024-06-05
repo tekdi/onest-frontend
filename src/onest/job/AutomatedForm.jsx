@@ -1,5 +1,5 @@
 // AutomatedForm.js
-import React, { useState, useEffect, useToast } from "react";
+import React, { useState, useEffect } from "react";
 import initReqBodyJson from "../assets/bodyJson/userDetailsBody.json";
 import "./Shared.css";
 import OrderSuccessModal from "./OrderSuccessModal";
@@ -22,6 +22,7 @@ import {
   Alert,
   HStack,
   AlertIcon,
+  useToast,
 } from "@chakra-ui/react";
 import { add } from "lodash";
 import { useParams } from "react-router-dom";
