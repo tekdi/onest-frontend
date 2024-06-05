@@ -5,41 +5,32 @@ import initReqBodyJson from "../assets/bodyJson/userDetailsBody.json";
 import OrderSuccessModal from "./OrderSuccessModal";
 import "./Shared.css";
 
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Loader from "./Loader";
 
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
+  HStack,
   Input,
   Select,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  HStack,
-  VStack,
-  useToast,
   Text,
-  Alert,
-  AlertIcon,
+  useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
-import { registerTelementry } from "../api/Apicall";
 import { dataConfig } from "../card";
 
 const AutomatedForm = () => {
   const { jobId, transactionId, type } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [openModal, setOpenModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [orderId, setOrderId] = useState("");
