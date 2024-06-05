@@ -89,7 +89,7 @@ const List = () => {
   const handleOpenModal = () => {
     setShowFiltersModal(true);
   };
-  console.log("filterData", filterData);
+
   return (
     <Box p="4">
       <Flex justify="space-between" align="center" mb="4">
