@@ -35,9 +35,9 @@ const List = () => {
         const configData = dataConfig[type] || {};
         setConfig(configData);
         const apiUrl = configData?.apiLink;
-        response = await axios.post(apiUrl, configData?.payload || {});
-        if (configData.apiResponce) {
-          response = configData.apiResponce(response);
+        response = await axios.post(apiUrl);
+        if (configData.apiResponse) {
+          response = configData.apiResponse(response);
         }
         if (response) {
           setCardData(response);
@@ -89,7 +89,7 @@ const List = () => {
   const handleOpenModal = () => {
     setShowFiltersModal(true);
   };
-
+  console.log("filterData", filterData);
   return (
     <Box p="4">
       <Flex justify="space-between" align="center" mb="4">
@@ -166,7 +166,7 @@ const RenderCards = ({ obj, config }) => {
           navigate(replaceUrlParam(config?.detailLink.replase, obj));
         } else {
           if (obj?.id) {
-            navigate(`/${config?.listLink}/${obj?.id}`);
+            navigate(`/${config?.listLink}/${obj?.item_id}`);
           }
         }
       }}

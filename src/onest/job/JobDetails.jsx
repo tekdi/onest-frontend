@@ -1,12 +1,20 @@
-import { Box, Button, Divider, HStack, Icon, Text } from "@chakra-ui/react";
+import {
+  Alert,
+  AlertIcon,
+  Box,
+  Button,
+  Divider,
+  HStack,
+  Icon,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import ReactGA from "react-ga4";
 import { useTranslation } from "react-i18next";
 // import { FaBriefcase, FaRupeeSign } from "react-icons/fa";
 // import { MdLocationPin } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { v4 as uuidv4 } from "uuid";
 import { registerTelementry } from "../api/Apicall";
 // import Header from "./Header";
@@ -14,11 +22,10 @@ import Loader from "./Loader";
 import "./Shared.css";
 import { dataConfig } from "../card";
 
-
 function JobDetails() {
   const { type } = useParams();
- 
-  const baseUrl = dataConfig[type].apiLink_API_BASE_URL
+
+  const baseUrl = dataConfig[type].apiLink_API_BASE_URL;
   const db_cache = dataConfig[type].apiLink_DB_CACHE;
   const envConfig = dataConfig[type];
 
@@ -38,19 +45,27 @@ function JobDetails() {
   const [siteUrl, setSiteUrl] = useState(window.location.href);
 
   let [transactionId, settransactionId] = useState(state?.transactionId);
-  console.log(transactionId);
+  // console.log(transactionId);
   //const jobsData  = selectJson?.responses[0]?.message?.order?.items[0]
   //console.log(jobsData);
-  function errorMessage(message) {
-    toast.error(message, {
-      position: toast.POSITION.BOTTOM_CENTER,
-      autoClose: 5000,
-      hideProgressBar: false,
-      theme: "colored",
-      pauseOnHover: true,
-      toastClassName: "full-width-toast",
+  const toast = useToast();
+
+  const errorMessage = (message) => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      status: "error",
+      position: "bottom-left",
+      render: () => (
+        <Alert w="100%" status="error" variant="solid">
+          <HStack space={2} alignItems="left">
+            <AlertIcon />
+            <Text>{message}</Text>
+          </HStack>
+        </Alert>
+      ),
     });
-  }
+  };
 
   const trackReactGA = () => {
     console.log("User clicked the Apply job details button");
@@ -72,11 +87,11 @@ function JobDetails() {
         },
         body: JSON.stringify({
           context: {
-            domain: envConfig.VITE_DOMAIN,
+            domain: envConfig?.apiLink_DOMAIN,
             action: "select",
             version: "1.1.0",
-            bap_id: envConfig.VITE_BAP_ID,
-            bap_uri: envConfig.VITE_BAP_URI,
+            bap_id: envConfig.apiLink_BAP_ID,
+            bap_uri: envConfig.apiLink_BAP_URI,
             bpp_id: jobInfo?.bpp_id,
             bpp_uri: jobInfo?.bpp_uri,
             transaction_id: transactionId,
@@ -181,7 +196,7 @@ function JobDetails() {
     if (transactionId === undefined) {
       settransactionId(uuidv4()); // Update state only when necessary
     } else {
-      registerTelementry(siteUrl, transactionId);
+      //registerTelementry(siteUrl, transactionId);
 
       // ReactGA.pageview(window.location.pathname + window.location.search);
       var requestOptions = {

@@ -6,18 +6,20 @@ import OrderSuccessModal from "./OrderSuccessModal";
 import "./Shared.css";
 
 import { useLocation, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Loader from "./Loader";
 
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
+  HStack,
   Input,
   Select,
+  Text,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
@@ -54,6 +56,25 @@ const AutomatedForm = () => {
 
   const { jobId } = useParams();
   const { transactionId } = useParams();
+
+  const toast = useToast();
+
+  const errorMessage = (message) => {
+    toast({
+      duration: 5000,
+      isClosable: true,
+      status: "error",
+      position: "bottom-left",
+      render: () => (
+        <Alert w="100%" status="error" variant="solid">
+          <HStack space={2} alignItems="left">
+            <AlertIcon />
+            <Text>{message}</Text>
+          </HStack>
+        </Alert>
+      ),
+    });
+  };
 
   useEffect(() => {
     registerTelementry(siteUrl, transactionId);
@@ -454,17 +475,6 @@ const AutomatedForm = () => {
       // setLoading(false);
     }
   };
-
-  function errorMessage(message) {
-    toast.error(message, {
-      position: toast.POSITION.BOTTOM_CENTER,
-      autoClose: 5000,
-      hideProgressBar: false,
-      theme: "colored",
-      pauseOnHover: true,
-      toastClassName: "full-width-toast",
-    });
-  }
 
   const fetchInitDetails = async () => {
     // const errors = validateForm(formData);
