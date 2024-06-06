@@ -675,3 +675,73 @@ export const registerTelementry = async (siteUrl, transactionId) => {
     console.error("Error:", error);
   }
 };
+
+export const getTrackData = async ({ filters, ...params } = {}) => {
+  let headers = {
+    "Content-Type": "application/json",
+  };
+
+  const newParams = {
+    ...params,
+    ...(filters ? transformFilters({ filters }) : {}),
+  };
+  try {
+    const result = await axios.post(`${baseUrl}/Tracking/search`, newParams, {
+      headers,
+    });
+    if (result) {
+      return result;
+    } else {
+      return {};
+    }
+  } catch ({ response, message }) {
+    return {
+      status: response?.status ? response?.status : 404,
+      error: response?.data?.message ? response?.data?.message : message,
+    };
+  }
+};
+
+export const createTrackData = async (params = {}, header = {}) => {
+  let headers = {
+    ...header,
+    "Content-Type": "application/json",
+  };
+  try {
+    const result = await axios.post(`${baseUrl}/Tracking/invite`, params, {
+      headers,
+    });
+    if (result?.data) {
+      return result?.data;
+    } else {
+      return {};
+    }
+  } catch ({ response, message }) {
+    return {
+      status: response?.status ? response?.status : 404,
+      error: response?.data?.message ? response?.data?.message : message,
+    };
+  }
+};
+
+export const statusTrack = async ({ ...params } = {}, header = {}) => {
+  let headers = {
+    ...header,
+    Authorization: "Bearer " + localStorage.getItem("token"),
+  };
+
+  try {
+    const result = await axios.post(
+      `${process.env.REACT_APP_SCHOLARSHIPS_BASE_URL}/status`,
+      params,
+      { headers }
+    );
+    if (result?.data) {
+      return result?.data;
+    } else {
+      return {};
+    }
+  } catch (e) {
+    return e;
+  }
+};

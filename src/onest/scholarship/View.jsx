@@ -15,10 +15,11 @@ import { useTranslation } from "react-i18next";
 import { MdLocationPin } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { registerTelementry } from "../api/Apicall";
+import { getTrackData, registerTelementry, statusTrack } from "../api/Apicall";
 import Loader from "./Loader";
 import "./Shared.css";
 import { dataConfig } from "../card";
+import OrderSuccessModal from "./OrderSuccessModal";
 
 function JobDetails() {
   const { type } = useParams();
@@ -39,21 +40,14 @@ function JobDetails() {
   const { jobId } = useParams();
   const [siteUrl] = useState(window.location.href);
   const [transactionId] = useState(uuidv4());
-  //remove telemetry
   const toast = useToast();
-  // const uniqueId = uuidv4();
+  const [listData, setListData] = useState([]);
+  const [status, setStatus] = useState("Applied");
 
-  //   useEffect(() => {
-  //     if (transactionId === undefined) {
-  //       const uniqueId = uuidv4();
-  //       settransactionId(uniqueId); // Update state only when necessary
-  //     }else{
-  //       registerTelementry(siteUrl, transactionId);
-  //     }
-  // }, [transactionId]);
-
-  //const jobsData  = selectJson?.responses[0]?.message?.order?.items[0]
-  //console.log(jobsData);
+  const closeModal = () => {
+    setOpenModal(false);
+    navigate("/");
+  };
 
   const errorMessage = (message) => {
     toast({
@@ -71,6 +65,76 @@ function JobDetails() {
       ),
     });
   };
+
+  const getApplicationStatus = async (order_id) => {
+    const apiUrl = `${baseUrl}/content/searchOrder/${order_id}`;
+    try {
+      await axios
+        .get(apiUrl)
+        .then(async (response) => {
+          try {
+            setLoading(true);
+            const payload = {
+              context: {
+                domain: envConfig.apiLink_DOMAIN,
+                action: "status",
+                version: "1.1.0",
+                bap_id: envConfig.apiLink_BAP_ID,
+                bap_uri: envConfig.apiLink_BAP_URI,
+                bpp_id: response?.data?.bpp_id,
+                bpp_uri: response?.data?.bpp_uri,
+                transaction_id: transactionId,
+                message_id: uuidv4(),
+                timestamp: new Date().toISOString(),
+              },
+              message: {
+                order_id: order_id,
+              },
+            };
+
+            const res = await statusTrack(payload);
+            if (res?.responses[0]?.message) {
+              setStatus(
+                res?.responses[0]?.message?.order?.fulfillments[0]?.state
+                  ?.descriptor?.name
+              );
+            }
+            setLoading(false);
+          } catch (e) {
+            console.error(
+              "Error constructing payload or handling response:",
+              e
+            );
+            setLoading(false);
+          }
+        })
+        .catch((error) => {
+          console.error("Axios GET request error:", error);
+        });
+    } catch (error) {
+      console.log("error ::", error);
+    }
+    setOpenModal(true);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const userDataDetails = localStorage.getItem("userData");
+      const userData = JSON.parse(userDataDetails);
+      const data = {
+        context: type,
+        context_item_id: jobId,
+        user_id: userData.user_id,
+      };
+      let result = await getTrackData({ filters: data });
+      if (result?.data.length) {
+        setListData(result?.data);
+        getApplicationStatus(result?.data[0].order_id);
+      }
+    };
+    //fetchData();
+    // Uncomment the above line when you have a registered user
+  }, []);
 
   const trackReactGA = () => {
     console.log("User clicked the Apply button");
@@ -297,28 +361,37 @@ function JobDetails() {
           display="flex"
           justifyContent={["center", "flex-start"]}
         >
-          <Button
-            marginTop={2}
-            marginRight={[0, 5]}
-            width={["100%", 200]}
-            colorScheme="blue"
-            variant="solid"
-            backgroundColor="blue.500"
-            color="white"
-            onClick={() => {
-              navigate(
-                `/${envConfig?.listLink}/automatedForm/${jobId}/${transactionId}`,
-                {
-                  state: {
-                    jobDetails: jobDetails,
-                  },
-                }
-              );
-              trackReactGA();
-            }}
-          >
-            {t("Apply")}
-          </Button>
+          {listData.length ? (
+            <OrderSuccessModal
+              isOpen={openModal}
+              onClose={closeModal}
+              orderId={status}
+              applied={true}
+            />
+          ) : (
+            <Button
+              marginTop={2}
+              marginRight={[0, 5]}
+              width={["100%", 200]}
+              colorScheme="blue"
+              variant="solid"
+              backgroundColor="blue.500"
+              color="white"
+              onClick={() => {
+                navigate(
+                  `/${envConfig?.listLink}/automatedForm/${jobId}/${transactionId}`,
+                  {
+                    state: {
+                      jobDetails: jobDetails,
+                    },
+                  }
+                );
+                trackReactGA();
+              }}
+            >
+              {t("Apply")}
+            </Button>
+          )}
         </Box>
       </Box>
 

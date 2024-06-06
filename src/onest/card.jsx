@@ -1,3 +1,4 @@
+import { createTrackData, getTrackData } from "./api/Apicall";
 const env = import.meta.env;
 
 export const dataConfig = {
@@ -17,6 +18,18 @@ export const dataConfig = {
     imageUrl: "",
 
     apiResponse: (e) => e.data?.data?.[env.VITE_SCHOLASHIPS_DB_CACHE],
+    onOrderIdGenerate: async (val) => {
+      const data = {
+        user_id: `${val.userData.user_id}`,
+        context: val.type,
+        context_item_id: val.jobId,
+        status: "created",
+        order_id:
+          val.response?.data?.data[process.env.VITE_SCHOLARSHIPS_INSERT_ORDER]
+            ?.returning?.[0]?.order_id,
+      };
+      await createTrackData(data);
+    },
   },
 
   jobs: {
@@ -45,6 +58,20 @@ export const dataConfig = {
     imageUrl: "",
 
     apiResponse: (e) => e.data?.data?.[env.VITE_JOBS_DB_CACHE],
+    onOrderIdGenerate: async (val) => {
+      const data = {
+        user_id: val?.userData.user_id,
+        context: val?.type,
+        context_item_id: val?.jobId,
+        status: "created",
+        order_id:
+          val?.response?.data?.data[process.env.VITE_JOBS_INSERT_ORDER]
+            ?.returning?.[0]?.order_id,
+        provider_name: val?.item?.provider_name || "",
+        item_name: val?.item?.title || "",
+      };
+      await createTrackData(data);
+    },
     // render: (e) => {
     //   console.log(e);
     //   return (
@@ -71,6 +98,47 @@ export const dataConfig = {
     apiLink_BASE_URL: env.VITE_BASE_URL,
 
     apiResponse: (e) => e.data?.data?.[env.VITE_LEARNINGS_DB_CACHE],
+    getTrackData: async (e) => {
+      const data = {
+        context: e?.type || "",
+        context_item_id: e?.itemId,
+        user_id: e?.user_id,
+      };
+      let result = await getTrackData({ filters: data });
+      return {
+        ...result?.data?.[0],
+        params: result?.data?.[0]?.params
+          ? JSON.parse(result?.data?.[0]?.params)
+          : {},
+      };
+    },
+    onOrderIdGenerate: async (val) => {
+      const paramData = { url: "", type: "" };
+      paramData.url =
+        val.response.responses?.[0]?.message.order?.fulfillments?.[0]?.stops?.[0]?.instructions?.media?.[0]?.url;
+      paramData.type =
+        val.response.responses?.[0]?.message.order?.fulfillments?.[0]?.stops?.[0]?.type;
+      // const list =
+      //   val.response.responses[0].message.order.items[0].tags[0].list;
+      // list.forEach((item) => {
+      //   // Check if the descriptor code is "urlType"
+      //   if (item.descriptor.code === "urlType") {
+      //     // If found, extract the value associated with it
+      //     paramData.type = item.value;
+      //   }
+      // });
+      const data = {
+        user_id: `${val.userData.user_id}`,
+        context: val.type,
+        context_item_id: val.itemId,
+        status: "created",
+        order_id: val.response.responses?.[0]?.message.order.id,
+        provider_name: val?.item?.provider_name || "",
+        item_name: val?.item?.title || "",
+        params: JSON.stringify(paramData),
+      };
+      await createTrackData(data);
+    },
     // apiResponse: ({ data }) => {
     //   let response = [];
     //   //   response = data?.message?.catalog?.providers?.flatMap((e) => e.items);
