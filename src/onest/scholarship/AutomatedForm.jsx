@@ -252,14 +252,6 @@ const AutomatedForm = () => {
         "submission_id"
       ] = localStorage.getItem("submissionId");
 
-      // initReqBodyJson.init[1].message.order.provider["id"] =
-      //   jobDetails?.message?.order?.provider?.id;
-      // initReqBodyJson.init[1].message.order.items[0]["id"] =
-      //   jobDetails?.message?.order?.items[0]?.id;
-      // initReqBodyJson.init[1].message.order.fulfillments[0]["id"] =
-      //   jobDetails?.message?.order?.items[0]?.fulfillment_ids[0];
-      // initReqBodyJson.init[1].message.order.fulfillments[0]["customer"] =
-      //   customerBody.hasOwnProperty('customer') ? customerBody['customer'] : customerBody;
       const paramBody = initReqBodyJson.init[1];
 
       // Perform API call with formData
@@ -482,29 +474,8 @@ const AutomatedForm = () => {
       initReqBody["context"]["transaction_id"] = transactionId;
       initReqBody["context"]["timestamp"] = new Date().toISOString();
       initReqBody["context"]["message_id"] = uuidv4();
-      // initReqBody.message.order.provider["id"] = jobDetails?.message?.order?.provider?.id;
-      // initReqBody.message.order.items[0]["id"] = jobDetails?.message?.order?.items[0]?.id;
-      // initReqBody.message.order.fulfillments[0]["id"] = jobDetails?.message?.order?.items[0]?.fulfillment_ids[0];
-
-      // // initReqBody.message.order.fulfillments[0]["customer"]['person'] = formData['person'];
-      // initReqBody.message.order.fulfillments[0]["customer"]['contact'] = formData['contact'];
-      // initReqBody.message.order.fulfillments[0]["customer"]['person'] = {...formData['person'] , ...JSON.parse(localStorage.getItem('autoFormData'))}
 
       initReqBody.message = jobDetails?.message;
-      // initReqBody.message.order.items[0].xinput.form["submission_id"] =
-      //   localStorage.getItem("submissionId");
-
-      // let tempString = initReqBody.message.order.items[0].xinput.form.url;
-      // console.log("tempString -- ", tempString);
-      // console.log("Transactionid -- ", transactionId);
-
-      // if (!tempString.match(transactionId)) {
-      //   errorMessage(
-      //     "Transaction Id and XInput form id does not match. Please try again."
-      //   );
-      //   setLoading(false);
-      //   return;
-      // }
 
       const paramBody = initReqBody;
       // Perform API call with formData
