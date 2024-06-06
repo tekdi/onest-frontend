@@ -16,7 +16,11 @@ import { useTranslation } from "react-i18next";
 // import { MdLocationPin } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { getTrackData, registerTelementry, statusTrack } from "../api/Apicall";
+import {
+  getTrackData,
+  jobStatusTrack,
+  registerTelementry,
+} from "../api/Apicall";
 // import Header from "./Header";
 import Loader from "./Loader";
 import "./Shared.css";
@@ -100,7 +104,7 @@ function JobDetails() {
               },
             };
 
-            const res = await statusTrack(payload);
+            const res = await jobStatusTrack(payload);
             if (res?.responses[0]?.message) {
               setStatus(
                 res?.responses[0]?.message?.order?.fulfillments[0]?.state
