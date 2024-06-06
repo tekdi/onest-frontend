@@ -14,7 +14,7 @@ let configDatas = localStorage.getItem("config");
 let localData = JSON.parse(configDatas);
 
 let data = config;
-
+const env = import.meta.env;
 export const fetchToken = async (params = {}, header = {}) => {
   let headers = {
     ...header,
@@ -732,7 +732,29 @@ export const statusTrack = async ({ ...params } = {}, header = {}) => {
 
   try {
     const result = await axios.post(
-      `${process.env.REACT_APP_SCHOLARSHIPS_BASE_URL}/status`,
+      `${process.env.VITE_SCHOLASHIPS_API_BASE_URL}/status`,
+      params,
+      { headers }
+    );
+    if (result?.data) {
+      return result?.data;
+    } else {
+      return {};
+    }
+  } catch (e) {
+    return e;
+  }
+};
+
+export const jobStatusTrack = async ({ ...params } = {}, header = {}) => {
+  let headers = {
+    ...header,
+    Authorization: "Bearer " + localStorage.getItem("token"),
+  };
+
+  try {
+    const result = await axios.post(
+      `${env.VITE_JOBS_API_BASE_URL}/status`,
       params,
       { headers }
     );
