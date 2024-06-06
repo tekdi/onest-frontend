@@ -1,64 +1,52 @@
 // AutomatedForm.js
-import React, { useState, useEffect, useToast } from "react";
-import initReqBodyJson from "../assets/bodyJson/userDetailsBody.json";
-import "./Shared.css";
-import OrderSuccessModal from "./OrderSuccessModal";
+import React, { useEffect, useState } from "react";
 import ReactGA from "react-ga4";
+import initReqBodyJson from "../assets/bodyJson/userDetailsBody.json";
+import OrderSuccessModal from "./OrderSuccessModal";
+import "./Shared.css";
 
-import { useLocation, useNavigate } from "react-router-dom";
-// import Header from "./Header";
+import { useNavigate, useParams } from "react-router-dom";
 import Loader from "./Loader";
-import themeConfig from "../assets/ui-config/themeConfig.json";
 
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Input,
-  Textarea,
-  Select,
-  Alert,
   HStack,
-  AlertIcon,
+  Input,
+  Select,
+  Text,
+  useToast,
 } from "@chakra-ui/react";
-import { add } from "lodash";
-import { useParams } from "react-router-dom";
+import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
-import axios from "axios";
-import { registerTelementry } from "../api/Apicall";
-
-const baseUrl = import.meta.env.VITE_API_BASE_URL;
-const db_cache = import.meta.env.VITE_DB_CACHE;
-const response_cache = import.meta.env.VITE_RESPONSE_DB;
-const envConfig = import.meta.env;
+import { dataConfig } from "../card";
 
 const AutomatedForm = () => {
-  const location = useLocation();
-  const state = location?.state;
+  const { jobId, transactionId, type } = useParams();
   const { t } = useTranslation();
-
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [message, setMessage] = useState("Application ID");
 
-  const [submissionStatus, setSubmissionStatus] = useState(null);
-  const [apiResponse, setApiResponse] = useState("");
+  const envConfig = dataConfig[type];
+  const response_cache = dataConfig[type].apiLink_RESPONSE_DB;
+  const baseUrl = dataConfig[type].apiLink_API_BASE_URL;
+  const db_cache = dataConfig[type].apiLink_DB_CACHE;
 
-  const [selectDetails, setSelectDetails] = useState(null);
   const [jobInfo, setJobInfo] = useState(null);
   const [isAutoForm, setIsAutoForm] = useState(true);
 
   const userDataString = localStorage.getItem("userData");
   const userData = JSON.parse(userDataString);
-  const [siteUrl, setSiteUrl] = useState(window.location.href);
-
-  const { jobId } = useParams();
-  const { transactionId } = useParams();
+  // const [siteUrl, setSiteUrl] = useState(window.location.href);
   const toast = useToast();
 
   const errorMessage = (message) => {
@@ -77,6 +65,10 @@ const AutomatedForm = () => {
       ),
     });
   };
+
+  // useEffect(() => {
+  //   registerTelementry(siteUrl, transactionId);
+  // }, []);
 
   useEffect(() => {
     const url = window.location.href;
@@ -104,10 +96,6 @@ const AutomatedForm = () => {
       localStorage.setItem("distributor-name", params["distributor-name"]);
     }
 
-    if (params["utm_source"]) {
-      localStorage.setItem("utm_source", params["utm_source"]);
-    }
-
     const urlParams = new URLSearchParams(window.location.search);
     const jsonDataParam = urlParams.get("jsonData");
 
@@ -115,7 +103,6 @@ const AutomatedForm = () => {
       let jsonData = atob(jsonDataParam);
       localStorage.setItem("userData", jsonData);
     }
-    registerTelementry(siteUrl, transactionId);
   }, []);
 
   const [formData, setFormData] = useState({
@@ -224,7 +211,7 @@ const AutomatedForm = () => {
       order_id: appId,
       name: formData["person"]["name"],
       gender: formData["person"]["gender"],
-      phone: formData["contact"]["phone"],
+      phone: `${formData["contact"]["phone"]}`,
       email: formData["contact"]["email"],
     };
 
@@ -249,9 +236,9 @@ const AutomatedForm = () => {
       let jobDetails = JSON.parse(localStorage.getItem("jobDetails"));
 
       initReqBodyJson.init[1]["context"]["action"] = "confirm";
-      initReqBodyJson.init[1]["context"]["domain"] = envConfig.VITE_DOMAIN;
-      initReqBodyJson.init[1]["context"]["bap_id"] = envConfig.VITE_BAP_ID;
-      initReqBodyJson.init[1]["context"]["bap_uri"] = envConfig.VITE_BAP_URI;
+      initReqBodyJson.init[1]["context"]["domain"] = envConfig.apiLink_DOMAIN;
+      initReqBodyJson.init[1]["context"]["bap_id"] = envConfig.apiLink_BAP_ID;
+      initReqBodyJson.init[1]["context"]["bap_uri"] = envConfig.apiLink_BAP_URI;
       initReqBodyJson.init[1]["context"]["bpp_id"] =
         jobDetails?.context?.bpp_id;
       initReqBodyJson.init[1]["context"]["bpp_uri"] =
@@ -260,16 +247,11 @@ const AutomatedForm = () => {
       initReqBodyJson.init[1]["context"]["message_id"] = uuidv4();
       initReqBodyJson.init[1]["context"]["timestamp"] =
         new Date().toISOString();
-      initReqBodyJson.init[1].message.order.provider["id"] =
-        jobDetails?.message?.order?.provider?.id;
-      initReqBodyJson.init[1].message.order.items[0]["id"] =
-        jobDetails?.message?.order?.items[0]?.id;
-      initReqBodyJson.init[1].message.order.fulfillments[0]["id"] =
-        jobDetails?.message?.order?.items[0]?.fulfillment_ids[0];
-      initReqBodyJson.init[1].message.order.fulfillments[0]["customer"] =
-        customerBody.hasOwnProperty("customer")
-          ? customerBody["customer"]
-          : customerBody;
+      initReqBodyJson.init[1].message = customerBody.responses[0].message;
+      initReqBodyJson.init[1].message.order.items[0].xinput.form[
+        "submission_id"
+      ] = localStorage.getItem("submissionId");
+
       const paramBody = initReqBodyJson.init[1];
 
       // Perform API call with formData
@@ -283,35 +265,18 @@ const AutomatedForm = () => {
       const data = await response.json();
       // Set state and open the modal
       if (data.responses.length) {
-        let appId = data.responses[0].message.order.id;
-        console.log("orderId", appId);
-
-        localStorage.setItem("applicationId", appId);
-
-        if (data.responses[0].hasOwnProperty("message")) {
-          for (const tag of data.responses[0]?.message?.order?.fulfillments[0]
-            ?.customer?.person?.tags) {
-            // Check if the descriptor code is "instructions"
-            if (
-              tag.descriptor &&
-              (tag.descriptor.code === "instructions" ||
-                tag.descriptor.code === "PROVISION-LETTER")
-            ) {
-              // Read its value
-              const instructionsValue = tag.list[0]?.value || "";
-              localStorage.setItem("instructionsValue", instructionsValue);
-              console.log("Instructions:", instructionsValue);
-              // You can do further processing with the instructions value here
-              break; // If you only want to read the value once found, you can break the loop
-            }
+        for (let i = 0; i < data.responses.length; i++) {
+          if (data.responses[i].hasOwnProperty("message")) {
+            let appId = data.responses[i].message.order.id;
+            console.log("orderId", appId);
+            window?.parent?.postMessage({ orderId: appId }, "*");
+            setOrderId(appId);
+            setMessage(message);
+            setModalOpen(true);
+            setLoading(false);
+            storedOrderId(appId);
           }
         }
-
-        setOrderId(appId);
-        setMessage(message);
-        setModalOpen(true);
-        setLoading(false);
-        storedOrderId(appId);
       } else {
         setLoading(false);
         errorMessage(
@@ -441,11 +406,11 @@ const AutomatedForm = () => {
         },
         body: JSON.stringify({
           context: {
-            domain: envConfig.VITE_DOMAIN,
+            domain: envConfig.apiLink_DOMAIN,
             action: "select",
             version: "1.1.0",
-            bap_id: envConfig.VITE_BAP_ID,
-            bap_uri: envConfig.VITE_BAP_URI,
+            bap_id: envConfig.apiLink_BAP_ID,
+            bap_uri: envConfig.apiLink_BAP_URI,
             bpp_id: jobInfo?.bpp_id,
             bpp_uri: jobInfo?.bpp_uri,
             transaction_id: transactionId,
@@ -476,10 +441,15 @@ const AutomatedForm = () => {
         );
       } else {
         data.responses[0]["context"]["message_id"] = uuidv4();
+        if (data.responses[0].message.order.items[0].xinput.form.url) {
+          searchForm(data.responses[0].message.order.items[0].xinput.form.url);
+        }
+        setLoading(false);
         // setjobDetails(data?.responses[0]);
-        fetchInitDetails(data?.responses[0]);
+        // fetchInitDetails(data?.responses[0]);
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error fetching job details:", error);
     } finally {
       // setLoading(false);
@@ -487,15 +457,6 @@ const AutomatedForm = () => {
   };
 
   const fetchInitDetails = async () => {
-    let usrtemp = localStorage.getItem("userData");
-    if (!usrtemp) {
-      const errors = validateForm(formData);
-      if (hasErrors(errors)) {
-        setFormErrors(errors);
-        return;
-      }
-    }
-
     try {
       setLoading(true);
 
@@ -503,61 +464,20 @@ const AutomatedForm = () => {
         ?.responses[0];
       localStorage.setItem("jobDetails", JSON.stringify(jobDetails));
 
-      console.log({ jobDetails });
       let initReqBody = initReqBodyJson.init[1];
       initReqBody["context"]["action"] = "init";
-      initReqBody["context"]["domain"] = envConfig.VITE_DOMAIN;
-      initReqBody["context"]["bap_id"] = envConfig.VITE_BAP_ID;
-      initReqBody["context"]["bap_uri"] = envConfig.VITE_BAP_URI;
+      initReqBody["context"]["domain"] = envConfig.apiLink_DOMAIN;
+      initReqBody["context"]["bap_id"] = envConfig.apiLink_BAP_ID;
+      initReqBody["context"]["bap_uri"] = envConfig.apiLink_BAP_URI;
       initReqBody["context"]["bpp_id"] = jobDetails?.context?.bpp_id;
       initReqBody["context"]["bpp_uri"] = jobDetails?.context?.bpp_uri;
       initReqBody["context"]["transaction_id"] = transactionId;
       initReqBody["context"]["timestamp"] = new Date().toISOString();
       initReqBody["context"]["message_id"] = uuidv4();
-      initReqBody.message.order.provider["id"] =
-        jobDetails?.message?.order?.provider?.id;
-      initReqBody.message.order.items[0]["id"] =
-        jobDetails?.message?.order?.items[0]?.id;
-      initReqBody.message.order.fulfillments[0]["id"] =
-        jobDetails?.message?.order?.items[0]?.fulfillment_ids[0];
 
-      initReqBody.message.order.fulfillments[0]["customer"]["person"] =
-        formData["person"];
-      initReqBody.message.order.fulfillments[0]["customer"]["contact"] =
-        formData["contact"];
-      let tempTags = [
-        {
-          code: "distributor-details",
-          list: [
-            {
-              descriptor: {
-                code: "distributor-name",
-                name: "Distributor Name",
-              },
-              value:
-                localStorage.getItem("distributor-name") !== null
-                  ? localStorage.getItem("distributor-name")
-                  : "",
-            },
-            {
-              descriptor: {
-                code: "agent-id",
-                name: "Agent Id",
-              },
-              value:
-                localStorage.getItem("agent-id") !== null
-                  ? localStorage.getItem("agent-id")
-                  : "",
-            },
-          ],
-        },
-      ];
+      initReqBody.message = jobDetails?.message;
 
-      initReqBody.message.order.fulfillments[0]["customer"]["person"]["tags"] =
-        tempTags;
-
-      let paramBody = initReqBody;
-
+      const paramBody = initReqBody;
       // Perform API call with formData
       const response = await fetch(`${baseUrl}/init`, {
         method: "POST",
@@ -573,26 +493,30 @@ const AutomatedForm = () => {
           t("Delay_in_fetching_the_details") + "(" + transactionId + ")"
         );
       } else {
-        if (
-          data?.responses[0]?.message?.order?.items[0].hasOwnProperty("xinput")
-        ) {
-          const curr =
-            data?.responses[0]?.message?.order?.items[0]?.xinput?.head?.index
-              ?.cur;
-          var max =
-            data?.responses[0]?.message?.order?.items[0]?.xinput?.head?.index
-              ?.max;
-          var formUrl =
-            data?.responses[0]?.message?.order?.items[0]?.xinput?.form?.url;
-          if (curr < max) {
-            searchForm(formUrl);
-          } else if (curr == max) {
-            setLoading(true);
-            confirmDetails();
-          }
-          setLoading(false);
+        localStorage.setItem("initRes", JSON.stringify(data));
+        if (localStorage.getItem("submissionId")) {
+          confirmDetails(data);
         } else {
-          confirmDetails(formData);
+          if (
+            data?.responses[0]?.message?.order?.items[0].hasOwnProperty(
+              "xinput"
+            )
+          ) {
+            //   const curr = data?.responses[0]?.message?.order?.items[0]?.xinput?.head?.index?.cur;
+            //   var max = data?.responses[0]?.message?.order?.items[0]?.xinput?.head?.index?.max;
+            var formUrl =
+              data?.responses[0]?.message?.order?.items[0]?.xinput?.form?.url;
+            //   if (curr < max) {
+            searchForm(formUrl);
+            //   } else if (curr == max) {
+            //     setLoading(true);
+            //     confirmDetails();
+            //   }
+            setLoading(false);
+
+            // } else {
+            //   confirmDetails(formData);
+          }
         }
       }
     } catch (error) {
@@ -610,7 +534,7 @@ const AutomatedForm = () => {
 
   useEffect(() => {
     setLoading(true);
-
+    localStorage.setItem("submissionId", "");
     var requestOptions = {
       method: "POST",
       headers: {
@@ -621,29 +545,36 @@ const AutomatedForm = () => {
 
     fetch(`${baseUrl}/jobs/search`, requestOptions)
       .then((response) => response.text())
-      .then((result) => {
+      .then(async (result) => {
         result = JSON.parse(result);
         setJobInfo(result?.data[db_cache][0]);
         localStorage.setItem("unique_id", result?.data[db_cache][0]?.unique_id);
-
-        let data = JSON.parse(localStorage.getItem("selectRes"));
-        if (data && data?.responses.length) {
-          let usrtemp = localStorage.getItem("userData");
-          if (usrtemp) {
-            fetchInitDetails(data?.responses[0]);
-          } else {
-            setIsAutoForm(false);
-            setLoading(false);
-          }
-        } else {
-          getSelectDetails(result?.data[db_cache][0]);
-        }
       })
       .catch((error) => console.log("error", error));
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      let data = JSON.parse(localStorage.getItem("selectRes"));
+      if (data && data?.responses.length && jobInfo) {
+        await fetchInitDetails(data?.responses[0]);
+
+        let usrtemp = localStorage.getItem("userData");
+        /* if(usrtemp){
+       fetchInitDetails(data?.responses[0]);
+       }else{
+         setIsAutoForm(false);
+         setLoading(false);
+       }*/
+      } else if (jobInfo) {
+        getSelectDetails(jobInfo);
+      }
+    };
+    fetchData();
+  }, [jobInfo]);
+
   const trackReactGA = () => {
-    console.log("User clicked the Submit form button");
+    //remove telemetry
     ReactGA.event({
       category: "Button Click",
       action: "submit_form",
@@ -655,19 +586,20 @@ const AutomatedForm = () => {
   const submitFormDetail = async (action, urlencoded) => {
     setLoading(true);
     trackReactGA();
-
     try {
       const axiosResponse = await axios.create().post(action, urlencoded, {
         headers: {
           "Content-Type": `application/x-www-form-urlencoded`,
         },
       });
-      console.log(axiosResponse.data);
 
       if (axiosResponse.data) {
         localStorage.setItem("submissionId", axiosResponse.data);
         setTimeout(() => {
-          getInitJson();
+          let initRes = JSON.parse(localStorage.getItem("initRes"));
+          confirmDetails(initRes);
+          // fetchInitDetails();
+          // getInitJson();
         }, 7000);
       }
     } catch (error) {
@@ -680,32 +612,6 @@ const AutomatedForm = () => {
       }
       console.error("Error submitting form:", error);
     }
-
-    /* try {
-      await fetch(action, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: urlencoded,
-      })
-        .then((response) => response.text())
-        .then((result) => {
-          setTimeout(() => {
-            getInitJson();
-          }, 7000);
-
-        })
-        .catch((error) => console.log("error", error));
-    } catch (error) {
-      setLoading(false);
-
-      console.error("Error submitting form:", error);
-    } finally {
-      // setTimeout(() => {
-      //   setLoading(false);
-      // }, 30000);
-    }*/
   };
 
   const responseSearch = async () => {
@@ -734,20 +640,38 @@ const AutomatedForm = () => {
 
   const closeModal = () => {
     // Close the modal and reset state
-    localStorage.setItem("instructionsValue", "");
     setModalOpen(false);
     setOrderId("");
     setMessage("");
     navigate("/");
   };
 
+  function hasSubmitButton() {
+    return (
+      document.querySelector('input[type="submit"]') !== null ||
+      document.querySelector('button[type="submit"]') !== null
+    );
+  }
+
+  // Function to add submit button dynamically
+  function addSubmitButton() {
+    var form = document.querySelector("form");
+
+    // Create submit button
+    var submitBtn = document.createElement("input");
+    submitBtn.type = "submit";
+    submitBtn.value = "Submit";
+    submitBtn.id = "submitBtn";
+    submitBtn.classList.add("autosubmit");
+
+    // Append submit button to the form
+    form.appendChild(submitBtn);
+  }
+
   const searchForm = async (url) => {
     try {
       await fetch(url, {
         method: "GET",
-        headers: {
-          "Content-Type": "text/html",
-        },
       })
         .then((response) => {
           if (!response.ok) {
@@ -759,6 +683,11 @@ const AutomatedForm = () => {
           const container = document.getElementById("formContainer");
           if (container) {
             container.innerHTML = htmlContent;
+
+            if (!hasSubmitButton()) {
+              addSubmitButton();
+            }
+
             setIsAutoForm(true);
             const form = document.getElementsByTagName("form")[0];
             const inputFields = form.querySelectorAll("input");
@@ -781,7 +710,6 @@ const AutomatedForm = () => {
 
             const userDataString = localStorage.getItem("userData");
             const userData = JSON.parse(userDataString);
-
             if (userData !== null) {
               // Get all input elements in the HTML content
               const inputElements = form.querySelectorAll("input");
@@ -835,33 +763,38 @@ const AutomatedForm = () => {
                 }
               });
             }
-
             form.addEventListener("submit", (e) => {
               e.preventDefault();
-              const formData = new FormData(form);
+              const formDataTmp = new FormData(form);
               var urlencoded = new URLSearchParams();
+
               let formDataObject = {};
-              formData.forEach(function (value, key) {
+
+              formDataTmp.forEach(function (value, key) {
                 formDataObject[key] = value;
                 urlencoded.append(key, value.toString());
               });
-              submitFormDetail(form.action, formData);
+
+              localStorage.setItem(
+                "autoFormData",
+                JSON.stringify(formDataObject)
+              );
+              // setFormData({...formData['person'] , ...localStorage.getItem('autoFormData')})
+              submitFormDetail(form.action, formDataTmp);
             });
           }
         });
     } catch (error) {
       console.error("Error submitting form:", error);
-      setSubmissionStatus("error");
     }
   };
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <Box marginTop={100}>
-      {/* <Header /> */}
-      {loading && (
-        //show
-        <Loader />
-      )}
       <Box margin={4}>
         <div id="formContainer"></div>
       </Box>

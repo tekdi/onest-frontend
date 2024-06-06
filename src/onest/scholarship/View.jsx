@@ -306,11 +306,14 @@ function JobDetails() {
             backgroundColor="blue.500"
             color="white"
             onClick={() => {
-              navigate("/automatedForm/" + jobId + "/" + transactionId, {
-                state: {
-                  jobDetails: jobDetails,
-                },
-              });
+              navigate(
+                `/${envConfig?.listLink}/automatedForm/${jobId}/${transactionId}`,
+                {
+                  state: {
+                    jobDetails: jobDetails,
+                  },
+                }
+              );
               trackReactGA();
             }}
           >
