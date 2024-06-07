@@ -18,7 +18,6 @@ import { v4 as uuidv4 } from "uuid";
 // import Header from "./Header";
 import { dataConfig } from "../card";
 import Loader from "./Loader";
-import OrderSuccessModal from "./OrderSuccessModal";
 import "./Shared.css";
 
 function JobDetails() {
@@ -42,18 +41,10 @@ function JobDetails() {
   const [jobDetails, setJobDetails] = useState(null);
   const { jobId } = useParams();
   const [siteUrl, setSiteUrl] = useState(window.location.href);
-  const [listData, setListData] = useState([]);
-  const [status, setStatus] = useState("Applied");
-  const [openModal, setOpenModal] = useState(false);
 
   let [transactionId, settransactionId] = useState(state?.transactionId);
 
   const toast = useToast();
-
-  const closeModal = () => {
-    setOpenModal(false);
-    navigate("/");
-  };
 
   const errorMessage = (message) => {
     toast({
@@ -311,36 +302,27 @@ function JobDetails() {
           display="flex"
           justifyContent={["center", "flex-start"]}
         >
-          {listData.length ? (
-            <OrderSuccessModal
-              isOpen={openModal}
-              onClose={closeModal}
-              orderId={status}
-              applied={true}
-            />
-          ) : (
-            <Button
-              marginTop={2}
-              marginRight={[0, 5]}
-              width={["100%", 200]}
-              colorScheme="blue"
-              variant="solid"
-              backgroundColor="blue.500"
-              color="white"
-              onClick={() => {
-                navigate(
-                  `/${envConfig?.listLink}/automatedForm/${jobId}/${transactionId}`,
-                  {
-                    state: {
-                      jobDetails: jobDetails,
-                    },
-                  }
-                );
-              }}
-            >
-              {t("Apply")}
-            </Button>
-          )}
+          <Button
+            marginTop={2}
+            marginRight={[0, 5]}
+            width={["100%", 200]}
+            colorScheme="blue"
+            variant="solid"
+            backgroundColor="blue.500"
+            color="white"
+            onClick={() => {
+              navigate(
+                `/${envConfig?.listLink}/automatedForm/${jobId}/${transactionId}`,
+                {
+                  state: {
+                    jobDetails: jobDetails,
+                  },
+                }
+              );
+            }}
+          >
+            {t("Apply")}
+          </Button>
         </Box>
       </Box>
 

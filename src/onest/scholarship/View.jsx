@@ -10,14 +10,12 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import ReactGA from "react-ga4";
 import { useTranslation } from "react-i18next";
 import { MdLocationPin } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { dataConfig } from "../card";
 import Loader from "./Loader";
-import OrderSuccessModal from "./OrderSuccessModal";
 import "./Shared.css";
 
 function JobDetails() {
@@ -40,13 +38,6 @@ function JobDetails() {
   const [siteUrl] = useState(window.location.href);
   const [transactionId] = useState(uuidv4());
   const toast = useToast();
-  const [listData, setListData] = useState([]);
-  const [status, setStatus] = useState("Applied");
-
-  const closeModal = () => {
-    setOpenModal(false);
-    navigate("/");
-  };
 
   const errorMessage = (message) => {
     toast({
@@ -160,17 +151,6 @@ function JobDetails() {
   }
 
   useEffect(() => {
-    /* if (transactionId === undefined) {
-      const uniqueId = uuidv4();
-      settransactionId(uniqueId); // Update state only when necessary
-
-    }else{
-      registerTelementry(siteUrl, transactionId);
-    }*/
-
-    //registerTelementry(siteUrl, transactionId);
-
-    // ReactGA.pageview(window.location.pathname + window.location.search);
     var requestOptions = {
       method: "POST",
       headers: {
@@ -279,36 +259,27 @@ function JobDetails() {
           display="flex"
           justifyContent={["center", "flex-start"]}
         >
-          {listData.length ? (
-            <OrderSuccessModal
-              isOpen={openModal}
-              onClose={closeModal}
-              orderId={status}
-              applied={true}
-            />
-          ) : (
-            <Button
-              marginTop={2}
-              marginRight={[0, 5]}
-              width={["100%", 200]}
-              colorScheme="blue"
-              variant="solid"
-              backgroundColor="blue.500"
-              color="white"
-              onClick={() => {
-                navigate(
-                  `/${envConfig?.listLink}/automatedForm/${jobId}/${transactionId}`,
-                  {
-                    state: {
-                      jobDetails: jobDetails,
-                    },
-                  }
-                );
-              }}
-            >
-              {t("Apply")}
-            </Button>
-          )}
+          <Button
+            marginTop={2}
+            marginRight={[0, 5]}
+            width={["100%", 200]}
+            colorScheme="blue"
+            variant="solid"
+            backgroundColor="blue.500"
+            color="white"
+            onClick={() => {
+              navigate(
+                `/${envConfig?.listLink}/automatedForm/${jobId}/${transactionId}`,
+                {
+                  state: {
+                    jobDetails: jobDetails,
+                  },
+                }
+              );
+            }}
+          >
+            {t("Apply")}
+          </Button>
         </Box>
       </Box>
 
