@@ -15,11 +15,10 @@ import { useTranslation } from "react-i18next";
 import { MdLocationPin } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { getTrackData, registerTelementry, statusTrack } from "../api/Apicall";
-import Loader from "./Loader";
-import "./Shared.css";
 import { dataConfig } from "../card";
+import Loader from "./Loader";
 import OrderSuccessModal from "./OrderSuccessModal";
+import "./Shared.css";
 
 function JobDetails() {
   const { type } = useParams();
@@ -65,75 +64,6 @@ function JobDetails() {
       ),
     });
   };
-
-  const getApplicationStatus = async (order_id) => {
-    const apiUrl = `${baseUrl}/content/searchOrder/${order_id}`;
-    try {
-      await axios
-        .get(apiUrl)
-        .then(async (response) => {
-          try {
-            setLoading(true);
-            const payload = {
-              context: {
-                domain: envConfig.apiLink_DOMAIN,
-                action: "status",
-                version: "1.1.0",
-                bap_id: envConfig.apiLink_BAP_ID,
-                bap_uri: envConfig.apiLink_BAP_URI,
-                bpp_id: response?.data?.bpp_id,
-                bpp_uri: response?.data?.bpp_uri,
-                transaction_id: transactionId,
-                message_id: uuidv4(),
-                timestamp: new Date().toISOString(),
-              },
-              message: {
-                order_id: order_id,
-              },
-            };
-
-            const res = await statusTrack(payload);
-            if (res?.responses[0]?.message) {
-              setStatus(
-                res?.responses[0]?.message?.order?.fulfillments[0]?.state
-                  ?.descriptor?.name
-              );
-            }
-            setLoading(false);
-          } catch (e) {
-            console.error(
-              "Error constructing payload or handling response:",
-              e
-            );
-            setLoading(false);
-          }
-        })
-        .catch((error) => {
-          console.error("Axios GET request error:", error);
-        });
-    } catch (error) {
-      console.log("error ::", error);
-    }
-    setOpenModal(true);
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const userDataDetails = localStorage.getItem("userData");
-      const userData = JSON.parse(userDataDetails);
-      const data = {
-        context: type,
-        context_item_id: jobId,
-        user_id: userData.user_id,
-      };
-      let result = await getTrackData({ filters: data });
-      if (result?.data.length) {
-        setListData(result?.data);
-        getApplicationStatus(result?.data[0].order_id);
-      }
-    };
-    fetchData();
-  }, []);
 
   const trackReactGA = () => {
     console.log("User clicked the Apply button");
