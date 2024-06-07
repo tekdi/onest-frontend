@@ -73,15 +73,6 @@ export const dataConfig = {
       // You can track this data by API call
       console.log("data", data);
     },
-    // render: (e) => {
-    //   console.log(e);
-    //   return (
-    //     <div>
-    //       <h1>{e.title} </h1>
-    //       <h2>{e.company}</h2>
-    //     </div>
-    //   );
-    // },
   },
   learning: {
     title: "Learning Experiences",
@@ -99,35 +90,12 @@ export const dataConfig = {
     apiLink_BASE_URL: env.VITE_BASE_URL,
 
     apiResponse: (e) => e.data?.data?.[env.VITE_LEARNINGS_DB_CACHE],
-    // getTrackData: async (e) => {
-    //   const data = {
-    //     context: e?.type || "",
-    //     context_item_id: e?.itemId,
-    //     user_id: e?.user_id,
-    //   };
-    //   let result = await getTrackData({ filters: data });
-    //   return {
-    //     ...result?.data?.[0],
-    //     params: result?.data?.[0]?.params
-    //       ? JSON.parse(result?.data?.[0]?.params)
-    //       : {},
-    //   };
-    // },
     onOrderIdGenerate: async (val) => {
       const paramData = { url: "", type: "" };
       paramData.url =
         val.response.responses?.[0]?.message.order?.fulfillments?.[0]?.stops?.[0]?.instructions?.media?.[0]?.url;
       paramData.type =
         val.response.responses?.[0]?.message.order?.fulfillments?.[0]?.stops?.[0]?.type;
-      // const list =
-      //   val.response.responses[0].message.order.items[0].tags[0].list;
-      // list.forEach((item) => {
-      //   // Check if the descriptor code is "urlType"
-      //   if (item.descriptor.code === "urlType") {
-      //     // If found, extract the value associated with it
-      //     paramData.type = item.value;
-      //   }
-      // });
       const data = {
         user_id: `${val.userData.user_id}`,
         context: val.type,
@@ -141,11 +109,5 @@ export const dataConfig = {
       // You can track this data by API call
       console.log("data", data);
     },
-    // apiResponse: ({ data }) => {
-    //   let response = [];
-    //   //   response = data?.message?.catalog?.providers?.flatMap((e) => e.items);
-    //   return data.data;
-    // },
-    // render: (e) => {},
   },
 };
