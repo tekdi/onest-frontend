@@ -1,4 +1,3 @@
-import { createTrackData, getTrackData } from "./api/Apicall";
 const env = import.meta.env;
 
 export const dataConfig = {
@@ -100,20 +99,20 @@ export const dataConfig = {
     apiLink_BASE_URL: env.VITE_BASE_URL,
 
     apiResponse: (e) => e.data?.data?.[env.VITE_LEARNINGS_DB_CACHE],
-    getTrackData: async (e) => {
-      const data = {
-        context: e?.type || "",
-        context_item_id: e?.itemId,
-        user_id: e?.user_id,
-      };
-      let result = await getTrackData({ filters: data });
-      return {
-        ...result?.data?.[0],
-        params: result?.data?.[0]?.params
-          ? JSON.parse(result?.data?.[0]?.params)
-          : {},
-      };
-    },
+    // getTrackData: async (e) => {
+    //   const data = {
+    //     context: e?.type || "",
+    //     context_item_id: e?.itemId,
+    //     user_id: e?.user_id,
+    //   };
+    //   let result = await getTrackData({ filters: data });
+    //   return {
+    //     ...result?.data?.[0],
+    //     params: result?.data?.[0]?.params
+    //       ? JSON.parse(result?.data?.[0]?.params)
+    //       : {},
+    //   };
+    // },
     onOrderIdGenerate: async (val) => {
       const paramData = { url: "", type: "" };
       paramData.url =
