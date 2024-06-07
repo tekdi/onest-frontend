@@ -10,15 +10,13 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import ReactGA from "react-ga4";
 import { useTranslation } from "react-i18next";
 import { MdLocationPin } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { registerTelementry } from "../api/Apicall";
+import { dataConfig } from "../card";
 import Loader from "./Loader";
 import "./Shared.css";
-import { dataConfig } from "../card";
 
 function JobDetails() {
   const { type } = useParams();
@@ -39,21 +37,7 @@ function JobDetails() {
   const { jobId } = useParams();
   const [siteUrl] = useState(window.location.href);
   const [transactionId] = useState(uuidv4());
-  //remove telemetry
   const toast = useToast();
-  // const uniqueId = uuidv4();
-
-  //   useEffect(() => {
-  //     if (transactionId === undefined) {
-  //       const uniqueId = uuidv4();
-  //       settransactionId(uniqueId); // Update state only when necessary
-  //     }else{
-  //       registerTelementry(siteUrl, transactionId);
-  //     }
-  // }, [transactionId]);
-
-  //const jobsData  = selectJson?.responses[0]?.message?.order?.items[0]
-  //console.log(jobsData);
 
   const errorMessage = (message) => {
     toast({
@@ -69,17 +53,6 @@ function JobDetails() {
           </HStack>
         </Alert>
       ),
-    });
-  };
-
-  const trackReactGA = () => {
-    console.log("User clicked the Apply button");
-
-    ReactGA.event({
-      category: "Button Click",
-      action: "apply_Button",
-      label: "Apply Button",
-      value: 2,
     });
   };
 
@@ -178,17 +151,6 @@ function JobDetails() {
   }
 
   useEffect(() => {
-    /* if (transactionId === undefined) {
-      const uniqueId = uuidv4();
-      settransactionId(uniqueId); // Update state only when necessary
-
-    }else{
-      registerTelementry(siteUrl, transactionId);
-    }*/
-
-    //registerTelementry(siteUrl, transactionId);
-
-    // ReactGA.pageview(window.location.pathname + window.location.search);
     var requestOptions = {
       method: "POST",
       headers: {
@@ -314,7 +276,6 @@ function JobDetails() {
                   },
                 }
               );
-              trackReactGA();
             }}
           >
             {t("Apply")}

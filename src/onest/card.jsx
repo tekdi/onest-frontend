@@ -17,6 +17,19 @@ export const dataConfig = {
     imageUrl: "",
 
     apiResponse: (e) => e.data?.data?.[env.VITE_SCHOLASHIPS_DB_CACHE],
+    onOrderIdGenerate: async (val) => {
+      const data = {
+        user_id: `${val.userData.user_id}`,
+        context: val.type,
+        context_item_id: val.jobId,
+        status: "created",
+        order_id:
+          val.response?.data?.data[process.env.VITE_SCHOLARSHIPS_INSERT_ORDER]
+            ?.returning?.[0]?.order_id,
+      };
+      // You can track this data by API call
+      console.log("data", data);
+    },
   },
 
   jobs: {
@@ -45,15 +58,21 @@ export const dataConfig = {
     imageUrl: "",
 
     apiResponse: (e) => e.data?.data?.[env.VITE_JOBS_DB_CACHE],
-    // render: (e) => {
-    //   console.log(e);
-    //   return (
-    //     <div>
-    //       <h1>{e.title} </h1>
-    //       <h2>{e.company}</h2>
-    //     </div>
-    //   );
-    // },
+    onOrderIdGenerate: async (val) => {
+      const data = {
+        user_id: val?.userData.user_id,
+        context: val?.type,
+        context_item_id: val?.jobId,
+        status: "created",
+        order_id:
+          val?.response?.data?.data[process.env.VITE_JOBS_INSERT_ORDER]
+            ?.returning?.[0]?.order_id,
+        provider_name: val?.item?.provider_name || "",
+        item_name: val?.item?.title || "",
+      };
+      // You can track this data by API call
+      console.log("data", data);
+    },
   },
   learning: {
     title: "Learning Experiences",
@@ -71,42 +90,24 @@ export const dataConfig = {
     apiLink_BASE_URL: env.VITE_BASE_URL,
 
     apiResponse: (e) => e.data?.data?.[env.VITE_LEARNINGS_DB_CACHE],
-    // apiResponse: ({ data }) => {
-    //   let response = [];
-    //   //   response = data?.message?.catalog?.providers?.flatMap((e) => e.items);
-    //   return data.data;
-    // },
-    // render: (e) => {},
-    payload: {
-      context: {
-        domain: "onest:learning-experiences",
-        action: "search",
-        version: "1.1.0",
-        bap_id: "13.201.4.186:6002",
-        bap_uri: "http://13.201.4.186:6002/",
-        location: {
-          country: {
-            name: "India",
-            code: "IND",
-          },
-          city: {
-            name: "Bangalore",
-            code: "std:080",
-          },
-        },
-        transaction_id: "a9aaecca-10b7-4d19-b640-b047a7c60008",
-        message_id: "a9aaecca-10b7-4d19-b640-b047a7c60009",
-        timestamp: "2023-02-06T09:55:41.161Z",
-      },
-      message: {
-        intent: {
-          item: {
-            descriptor: {
-              name: "",
-            },
-          },
-        },
-      },
+    onOrderIdGenerate: async (val) => {
+      const paramData = { url: "", type: "" };
+      paramData.url =
+        val.response.responses?.[0]?.message.order?.fulfillments?.[0]?.stops?.[0]?.instructions?.media?.[0]?.url;
+      paramData.type =
+        val.response.responses?.[0]?.message.order?.fulfillments?.[0]?.stops?.[0]?.type;
+      const data = {
+        user_id: `${val.userData.user_id}`,
+        context: val.type,
+        context_item_id: val.itemId,
+        status: "created",
+        order_id: val.response.responses?.[0]?.message.order.id,
+        provider_name: val?.item?.provider_name || "",
+        item_name: val?.item?.title || "",
+        params: JSON.stringify(paramData),
+      };
+      // You can track this data by API call
+      console.log("data", data);
     },
   },
 };

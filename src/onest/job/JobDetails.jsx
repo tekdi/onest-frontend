@@ -5,7 +5,6 @@ import {
   Button,
   Divider,
   HStack,
-  Icon,
   Text,
   useToast,
 } from "@chakra-ui/react";
@@ -16,11 +15,10 @@ import { useTranslation } from "react-i18next";
 // import { MdLocationPin } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { registerTelementry } from "../api/Apicall";
 // import Header from "./Header";
+import { dataConfig } from "../card";
 import Loader from "./Loader";
 import "./Shared.css";
-import { dataConfig } from "../card";
 
 function JobDetails() {
   const { type } = useParams();
@@ -45,9 +43,7 @@ function JobDetails() {
   const [siteUrl, setSiteUrl] = useState(window.location.href);
 
   let [transactionId, settransactionId] = useState(state?.transactionId);
-  // console.log(transactionId);
-  //const jobsData  = selectJson?.responses[0]?.message?.order?.items[0]
-  //console.log(jobsData);
+
   const toast = useToast();
 
   const errorMessage = (message) => {
@@ -64,16 +60,6 @@ function JobDetails() {
           </HStack>
         </Alert>
       ),
-    });
-  };
-
-  const trackReactGA = () => {
-    console.log("User clicked the Apply job details button");
-    ReactGA.event({
-      category: "Button Click",
-      action: "apply_Button",
-      label: "Apply Button",
-      value: 2,
     });
   };
 
@@ -333,7 +319,6 @@ function JobDetails() {
                   },
                 }
               );
-              trackReactGA();
             }}
           >
             {t("Apply")}

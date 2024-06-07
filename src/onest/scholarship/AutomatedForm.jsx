@@ -573,19 +573,8 @@ const AutomatedForm = () => {
     fetchData();
   }, [jobInfo]);
 
-  const trackReactGA = () => {
-    //remove telemetry
-    ReactGA.event({
-      category: "Button Click",
-      action: "submit_form",
-      label: "Submit Form",
-      value: 3,
-    });
-  };
-
   const submitFormDetail = async (action, urlencoded) => {
     setLoading(true);
-    trackReactGA();
     try {
       const axiosResponse = await axios.create().post(action, urlencoded, {
         headers: {
