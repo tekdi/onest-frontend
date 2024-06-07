@@ -28,7 +28,8 @@ export const dataConfig = {
           val.response?.data?.data[process.env.VITE_SCHOLARSHIPS_INSERT_ORDER]
             ?.returning?.[0]?.order_id,
       };
-      await createTrackData(data);
+      // You can track this data by API call
+      console.log("data", data);
     },
   },
 
@@ -70,7 +71,8 @@ export const dataConfig = {
         provider_name: val?.item?.provider_name || "",
         item_name: val?.item?.title || "",
       };
-      await createTrackData(data);
+      // You can track this data by API call
+      console.log("data", data);
     },
     // render: (e) => {
     //   console.log(e);
@@ -137,7 +139,8 @@ export const dataConfig = {
         item_name: val?.item?.title || "",
         params: JSON.stringify(paramData),
       };
-      await createTrackData(data);
+      // You can track this data by API call
+      console.log("data", data);
     },
     // apiResponse: ({ data }) => {
     //   let response = [];
@@ -145,36 +148,5 @@ export const dataConfig = {
     //   return data.data;
     // },
     // render: (e) => {},
-    payload: {
-      context: {
-        domain: "onest:learning-experiences",
-        action: "search",
-        version: "1.1.0",
-        bap_id: "13.201.4.186:6002",
-        bap_uri: "http://13.201.4.186:6002/",
-        location: {
-          country: {
-            name: "India",
-            code: "IND",
-          },
-          city: {
-            name: "Bangalore",
-            code: "std:080",
-          },
-        },
-        transaction_id: "a9aaecca-10b7-4d19-b640-b047a7c60008",
-        message_id: "a9aaecca-10b7-4d19-b640-b047a7c60009",
-        timestamp: "2023-02-06T09:55:41.161Z",
-      },
-      message: {
-        intent: {
-          item: {
-            descriptor: {
-              name: "",
-            },
-          },
-        },
-      },
-    },
   },
 };

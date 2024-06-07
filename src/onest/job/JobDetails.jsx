@@ -72,16 +72,6 @@ function JobDetails() {
     });
   };
 
-  const trackReactGA = () => {
-    console.log("User clicked the Apply job details button");
-    ReactGA.event({
-      category: "Button Click",
-      action: "apply_Button",
-      label: "Apply Button",
-      value: 2,
-    });
-  };
-
   const fetchJobDetails = async (jobInfo) => {
     try {
       setLoading(true);
@@ -346,7 +336,6 @@ function JobDetails() {
                     },
                   }
                 );
-                trackReactGA();
               }}
             >
               {t("Apply")}
