@@ -144,8 +144,7 @@ function JobDetails() {
         getApplicationStatus(result?.data[0].order_id);
       }
     };
-    //fetchData();
-    // Uncomment the above line when you have a registered user
+    fetchData();
   }, []);
 
   const trackReactGA = () => {
