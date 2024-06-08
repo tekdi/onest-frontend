@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { registerTelementry } from "../api/Apicall";
 // import Header from "./Header";
+import { dataConfig } from "../card";
 import Loader from "./Loader";
 import "./Shared.css";
-import { dataConfig } from "../card";
 
 function JobDetails() {
   const { type } = useParams();
@@ -40,16 +39,6 @@ function JobDetails() {
     setTimeout(() => {
       toast.style.display = "none";
     }, 5000); // Hide after 5 seconds
-  };
-
-  const trackReactGA = () => {
-    console.log("User clicked the Apply job details button");
-    ReactGA.event({
-      category: "Button Click",
-      action: "apply_Button",
-      label: "Apply Button",
-      value: 2,
-    });
   };
 
   const fetchJobDetails = async (jobInfo) => {

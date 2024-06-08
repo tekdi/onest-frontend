@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import ReactGA from "react-ga4";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
@@ -35,17 +34,6 @@ function JobDetails() {
     setTimeout(() => {
       toast.style.display = "none";
     }, 5000); // Hide after 5 seconds
-  };
-
-  const trackReactGA = () => {
-    console.log("User clicked the Apply button");
-
-    ReactGA.event({
-      category: "Button Click",
-      action: "apply_Button",
-      label: "Apply Button",
-      value: 2,
-    });
   };
 
   const fetchJobDetails = async (jobInfo) => {
@@ -137,17 +125,6 @@ function JobDetails() {
   }, []);
 
   useEffect(() => {
-    /* if (transactionId === undefined) {
-      const uniqueId = uuidv4();
-      settransactionId(uniqueId); // Update state only when necessary
-
-    }else{
-      registerTelementry(siteUrl, transactionId);
-    }*/
-
-    //registerTelementry(siteUrl, transactionId);
-
-    // ReactGA.pageview(window.location.pathname + window.location.search);
     var requestOptions = {
       method: "POST",
       headers: {

@@ -190,14 +190,12 @@ export const dataConfig = {
     apiLink_BASE_URL: env.VITE_BASE_URL,
 
     apiResponse: (e) => e.data?.data?.[env.VITE_LEARNINGS_DB_CACHE],
-
     onOrderIdGenerate: async (val) => {
       const paramData = { url: "", type: "" };
       paramData.url =
         val.response.responses?.[0]?.message.order?.fulfillments?.[0]?.stops?.[0]?.instructions?.media?.[0]?.url;
       paramData.type =
         val.response.responses?.[0]?.message.order?.fulfillments?.[0]?.stops?.[0]?.type;
-
       const data = {
         user_id: `${val.userData.user_id}`,
         context: val.type,

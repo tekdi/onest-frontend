@@ -645,7 +645,6 @@ const MediaPage = () => {
 
   const submitFormDetail = async (action, urlencoded) => {
     setLoading(true);
-    // trackReactGA();
 
     try {
       const axiosResponse = await axios.create().post(action, urlencoded, {

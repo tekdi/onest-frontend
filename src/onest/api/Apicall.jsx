@@ -14,7 +14,7 @@ let configDatas = localStorage.getItem("config");
 let localData = JSON.parse(configDatas);
 
 let data = config;
-
+const env = import.meta.env;
 export const fetchToken = async (params = {}, header = {}) => {
   let headers = {
     ...header,
