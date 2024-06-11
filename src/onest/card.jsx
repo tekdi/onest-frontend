@@ -127,7 +127,6 @@ export const dataConfig = {
       console.log("data", data);
     },
     render: (obj) => {
-      console.log("obj", obj);
       const getSalaryInfo = (data) => {
         // Find the object with descriptor.code === "salary-info"
         const salaryInfo = data.find(
@@ -230,14 +229,16 @@ export const dataConfig = {
                   : "Provider name not mentioned"}
               </div>
             </div>
-            <div className="row">
+            <div className="" style={{ textAlign: "left" }}>
               <strong>Description:</strong>
+              <br />
               <div
                 dangerouslySetInnerHTML={{
                   __html: obj.shortDescription
                     ? obj.shortDescription
                     : obj.description
-                    ? obj.description.substring(0, 100) + "..."
+                    ? obj.description.substring(0, 100) +
+                      `${obj.description?.length > 100 ? "..." : ""}`
                     : "",
                 }}
               />
