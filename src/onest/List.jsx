@@ -4,6 +4,7 @@ import { dataConfig } from "./card";
 import axios from "axios";
 import "./styles.css"; // Import external CSS
 import Loader from "./components/Loader";
+import Pagination from "./Pagination";
 
 const List = () => {
   const [cardData, setCardData] = useState([]);
@@ -14,6 +15,9 @@ const List = () => {
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [filter, setFilter] = useState({});
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
+  const [limit, setLimit] = useState(10);
 
   useEffect(() => {
     const fetchJobsData = async () => {
@@ -28,6 +32,7 @@ const List = () => {
         }
         if (response) {
           setCardData(response);
+          setTotalRows(response?.length);
           setFilterCardData(response);
           setFilterData(filterToData(configData?.filters, response));
         } else {
@@ -41,7 +46,7 @@ const List = () => {
     };
 
     fetchJobsData();
-  }, [type]);
+  }, [type, limit]);
 
   useEffect(() => {
     const fetchData = () => {
@@ -74,6 +79,24 @@ const List = () => {
   if (loading) {
     return <Loader />;
   }
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleLimitChange = (event) => {
+    setLimit(parseInt(event.target.value));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setCurrentPage(1); // Reset to page 1 whenever limit changes
+  };
+
+  // Calculate the starting and ending index for the current page
+  const startIndex = (currentPage - 1) * limit;
+  const endIndex = startIndex + limit;
+
+  // Get the current page data
+  const currentPageData = filterCardData.slice(startIndex, endIndex);
 
   return (
     <div className="container">
@@ -134,11 +157,27 @@ const List = () => {
           </div>
         </div>
       )}
+      <div>
+        <label htmlFor="limit">Results per page:</label>
+        <select id="limit" value={limit} onChange={handleLimitChange}>
+          {[5, 10, 15, 20].map((value) => (
+            <option key={value} value={value} disabled={value === limit}>
+              {value}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="card-container">
-        {filterCardData?.map((e) => (
+        {currentPageData?.map((e) => (
           <RenderCards key={e.id} obj={e} config={config} />
         ))}
       </div>
+      <Pagination
+        limit={limit}
+        page={currentPage}
+        totalRows={totalRows}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };
