@@ -1,23 +1,11 @@
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Button,
-  Flex,
-  HStack,
-  Heading,
-  Text,
-} from "@chakra-ui/react";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { MdKeyboardBackspace } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import Loader from "../components/Loader";
-import { getseletedData } from "../services/Apicall";
-// import { registerTelementry } from "../api/Apicall";
-import axios from "axios";
 import { dataConfig } from "../card";
+import Loader from "../components/Loader";
+import "./Shared.css";
 const env = import.meta.env;
 
 export async function post(url, body, headers = {}, onUploadProgress = {}) {
@@ -50,25 +38,17 @@ const Details = () => {
   const [error, setError] = useState(null);
   const [transactionId, setTransactionId] = useState(uuidv4());
   // const messageId = uuidv4();
-  const [siteUrl, setSiteUrl] = useState(window.location.href);
   // const [info, setInfo] = useState(state?.product);
   const dataShow = ["title", "name"];
 
   const errorMessage = (message) => {
-    toast({
-      duration: 5000,
-      isClosable: true,
-      status: "error",
-      position: "bottom-left",
-      render: () => (
-        <Alert w="100%" status="error" variant="solid">
-          <HStack space={2} alignItems="left">
-            <AlertIcon />
-            <Text>{message}</Text>
-          </HStack>
-        </Alert>
-      ),
-    });
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.style.display = "block";
+
+    setTimeout(() => {
+      toast.style.display = "none";
+    }, 5000); // Hide after 5 seconds
   };
 
   const fetchSelectedCourseData = async () => {
@@ -221,13 +201,8 @@ const Details = () => {
         },
       }
     );
-    // navigate(`/form`, { // Navigate to UserDetailsForm.jsx
-    //   state: {
-    //     product: story, // Pass selected data as state
-    //     transactionId: transactionId
-    //   },
-    // });
   };
+
   const handleBack = () => {
     navigate("/");
   };
@@ -255,7 +230,7 @@ const Details = () => {
             minHeight: "100vh",
           }}
         >
-          <Box textAlign="center"></Box>
+          <div className="text-center"></div>
         </div>
       ) : error ? (
         <div
@@ -266,73 +241,90 @@ const Details = () => {
             minHeight: "100vh",
           }}
         >
-          <Box textAlign="center" borderWidth="1px" boxShadow={"lg"}>
-            <Text fontSize="xl">{error}</Text>
-            <Button
-              mt={4}
-              colorScheme="#3182ce"
-              variant="solid"
-              background="#3182ce"
-              color="white"
+          <div className="text-center">
+            <p className="page-text">{error}</p>
+            <button
+              style={{
+                marginTop: "16px",
+                background: "#3182ce",
+                color: "white",
+              }}
               onClick={handleBack}
             >
               {t("GO_BACK")}
-            </Button>
-          </Box>
+            </button>
+          </div>
         </div>
       ) : (
-        <Box p={4} pt={30}>
-          <Box padding={4} borderRadius={15} backgroundColor={"white"} mb={5}>
-            <Flex justify="space-between" alignItems="center">
-              <Box>
+        <div>
+          <div
+            style={{
+              padding: "16px",
+              borderRadius: "15px",
+              backgroundColor: "white",
+              marginBottom: "16px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div>
                 {product.image_url && (
-                  <Box width={80} height={"auto"}>
+                  <div style={{ width: "80px", height: "auto" }}>
                     <img src={product.image_url} alt="Product" />
-                  </Box>
+                  </div>
                 )}
-              </Box>
-            </Flex>
+              </div>
+            </div>
 
-            <Heading mt={5} as="h2">
+            <h1 className="page-title" style={{ marginTop: "20px" }}>
               {product?.title}
-            </Heading>
-            <Text fontSize={16} my={3}>
+            </h1>
+            <p className="page-text" style={{ marginBottom: "15px" }}>
               Published By: {product?.provider_name}
-            </Text>
+            </p>
 
-            <Button
-              mt={3}
-              className="custom-Button"
+            <button
+              className="autosubmit"
               onClick={(e) => handleSubscribe(product)}
-              mb={7}
-              marginTop={2}
-              marginRight={[0, 5]}
-              width={["100%", 200]}
-              colorScheme="blue"
-              variant="solid"
-              backgroundColor="blue.500"
-              color="white"
             >
               {t("SUBSCRIBE")}
-            </Button>
-          </Box>
+            </button>
+          </div>
           {details !== undefined && (
-            <Box padding={4} borderRadius={15} backgroundColor={"white"}>
+            <div
+              className=""
+              style={{
+                padding: "16px",
+                borderRadius: "15px",
+                backgroundColor: "white",
+              }}
+            >
               {details?.tags?.[0]?.list?.map((item, itemIndex) => (
                 <>
                   {!fieldsToSkip.includes(item.descriptor.name) && (
                     <>
-                      <Box key={itemIndex} ml={5}>
+                      <div key={itemIndex} style={{ marginLeft: "16px" }}>
                         <ul style={{ listStyleType: "disc" }}>
                           <li>
                             {!item?.descriptor?.name &&
                               item?.descriptor?.code &&
                               item?.value !== "" && (
-                                <Text fontSize={16} fontWeight={900} mt={3}>
+                                <p
+                                  className="page-text"
+                                  style={{
+                                    fontWeight: "800",
+                                    marginTop: "12px",
+                                  }}
+                                >
                                   {convertNameToLearningOutcomes(
                                     item?.descriptor?.code
                                   )}
-                                </Text>
+                                </p>
                               )}
 
                             {item?.descriptor?.name &&
@@ -340,38 +332,46 @@ const Details = () => {
                             item?.value !== "null" &&
                             item?.value !== null &&
                             !fieldsToSkip.includes(item.descriptor.name) ? (
-                              <Box display="flex" mt={3}>
+                              <div
+                                className=""
+                                style={{ display: "flex", marginTop: "12px" }}
+                              >
                                 {item?.descriptor?.name && (
-                                  <Text
-                                    fontSize={16}
-                                    fontWeight={900}
-                                    marginRight={2}
+                                  <p
+                                    className="page-text"
+                                    style={{
+                                      fontWeight: "800",
+                                      marginTop: "12px",
+                                    }}
                                   >
                                     {convertNameToLearningOutcomes(
                                       item?.descriptor?.name
                                     )}
                                     :
-                                  </Text>
+                                  </p>
                                 )}
                                 {item?.value && (
-                                  <Text fontSize={16} color="gray.700">
+                                  <p
+                                    className="page-text"
+                                    style={{ marginTop: "12px" }}
+                                  >
                                     {item?.value}
-                                  </Text>
+                                  </p>
                                 )}
-                              </Box>
+                              </div>
                             ) : (
                               ""
                             )}
                           </li>
                         </ul>
-                      </Box>
+                      </div>
                     </>
                   )}
                 </>
               ))}
-            </Box>
+            </div>
           )}
-        </Box>
+        </div>
       )}
     </>
   );

@@ -1,36 +1,22 @@
-import { Box, Flex, Heading, Image } from "@chakra-ui/react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { dataConfig } from "./card";
+import "../App.css";
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  //remove telemetry
 
-  const FeatureCard = ({ title, onClick, imageUrl }) => {
+  const FeatureCard = ({ key, title, onClick, imageUrl }) => {
     return (
-      <Flex
-        p="6"
-        bg="white"
-        borderWidth="1px"
-        borderRadius="lg"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        textAlign="center"
-        boxShadow="md"
-        width="300px"
+      <div
+        className="card-container pointer"
         onClick={onClick}
-        cursor="pointer"
-        mb="8"
-        mr="4"
-        ml="4"
+        key={key}
+        style={{ width: "300px" }}
       >
-        {imageUrl && <Image src={imageUrl} mb="4" />}
-        <Heading as="h2" size="md" mb="2">
-          {title || "Untitled"}
-        </Heading>
-      </Flex>
+        {imageUrl && <img src={imageUrl} alt="" className="" />}
+        <h2 className="card-title">{title || "Untitled"}</h2>
+      </div>
     );
   };
 
@@ -43,21 +29,21 @@ const LandingPage = () => {
   };
 
   return (
-    <Box p="4">
-      <Flex flexWrap="wrap" justifyContent="center">
+    <div className="container">
+      <div className="center-div">
         {dataConfig.constructor.name === "Object" &&
-          Object.values(dataConfig).map((item) => {
+          Object.values(dataConfig).map((item, i) => {
             return (
               <FeatureCard
-                key={item}
+                key={i + 1}
                 title={item?.title}
                 onClick={() => handleCardClick(item?.listLink)}
                 imageUrl={item?.imageUrl}
               />
             );
           })}
-      </Flex>
-    </Box>
+      </div>
+    </div>
   );
 };
 

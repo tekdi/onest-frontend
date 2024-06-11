@@ -1,17 +1,5 @@
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Button,
-  Divider,
-  HStack,
-  Icon,
-  Text,
-  useToast,
-} from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { MdLocationPin } from "react-icons/md";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { dataConfig } from "../card";
@@ -37,23 +25,15 @@ function JobDetails() {
   const { jobId } = useParams();
   const [siteUrl] = useState(window.location.href);
   const [transactionId] = useState(uuidv4());
-  const toast = useToast();
 
   const errorMessage = (message) => {
-    toast({
-      duration: 5000,
-      isClosable: true,
-      status: "error",
-      position: "bottom-left",
-      render: () => (
-        <Alert w="100%" status="error" variant="solid">
-          <HStack space={2} alignItems="left">
-            <AlertIcon />
-            <Text>{message}</Text>
-          </HStack>
-        </Alert>
-      ),
-    });
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.style.display = "block";
+
+    setTimeout(() => {
+      toast.style.display = "none";
+    }, 5000); // Hide after 5 seconds
   };
 
   const fetchJobDetails = async (jobInfo) => {
@@ -110,7 +90,6 @@ function JobDetails() {
   };
 
   useEffect(() => {
-    console.log(window.location.href);
     const url = window.location.href;
 
     const getUrlParams = (url) => {
@@ -141,14 +120,9 @@ function JobDetails() {
 
     if (jsonDataParam) {
       let jsonData = atob(jsonDataParam);
-      console.log("Parsed JSON data:", jsonData);
       localStorage.setItem("userData", jsonData);
     }
   }, []);
-
-  function encodeJsonToQueryParam(jsonData) {
-    return encodeURIComponent(JSON.stringify(jsonData));
-  }
 
   useEffect(() => {
     var requestOptions = {
@@ -165,7 +139,6 @@ function JobDetails() {
         result = JSON.parse(result);
         setJobInfo(result?.data[db_cache][0]);
         if (transactionId !== undefined) {
-          console.log(transactionId);
           fetchJobDetails(result?.data[db_cache][0]);
         }
       })
@@ -174,148 +147,88 @@ function JobDetails() {
 
   return (
     <div>
-      <Box
-        fontFamily={"Alice"}
-        marginTop={100}
-        padding={4}
-        borderRadius={15}
-        backgroundColor={"white"}
-        marginLeft={4}
-        marginRight={4}
-      >
-        <Box>
-          <Text marginLeft={1} fontSize={["xl", "2xl", "3xl"]}>
-            {jobInfo?.title}
-          </Text>
-          {jobInfo?.provider_name && (
-            <Text
-              color="gray.700"
-              marginTop={"3"}
-              fontWeight={600}
-              marginLeft={1}
-              fontSize={["sm", "md"]}
-            >
-              {jobInfo?.provider_name}
-            </Text>
-          )}
-          {jobInfo?.company && (
-            <Text
-              color="gray.700"
-              marginTop={"2"}
-              marginLeft={1}
-              fontSize={["sm", "md"]}
-            >
-              {jobInfo?.company}
-            </Text>
-          )}
-          <HStack marginTop={"1"} marginLeft={1}>
-            {(jobInfo?.city || jobInfo?.state) && (
-              <div style={{ display: "flex" }}>
-                <Icon
-                  as={MdLocationPin}
-                  boxSize={4}
-                  marginTop={1}
-                  marginRight={1}
-                />{" "}
-                <Text fontSize={["xs", "sm"]}>{jobInfo?.city}</Text>
-                {jobInfo?.city && jobInfo?.state ? (
-                  <Text fontSize={["xs", "sm"]}>, {jobInfo?.state}</Text>
-                ) : (
-                  <Text fontSize={["xs", "sm"]}>{jobInfo?.state}</Text>
-                )}
-              </div>
-            )}
-          </HStack>
-          <HStack marginTop={"1"} marginLeft={1}>
-            <div style={{ display: "flex" }}>
-              {/* <Icon as={FaBriefcase} boxSize={4} marginRight={1} marginTop={1} /> */}
-
-              <Text
-                color="gray.700"
-                fontSize={["xs", "sm"]}
-                marginLeft={0.5}
-                textOverflow="ellipsis"
-              >
-                {jobInfo?.item?.descriptor?.long_desc}
-              </Text>
-            </div>
-          </HStack>
-          <HStack
-            marginLeft={1}
-            marginRight={1}
-            marginTop={"1"}
-            color={"blue"}
-            style={{ display: "flex" }}
-          >
-            {/* <Icon as={FaRupeeSign} boxSize={4} marginTop={1} /> */}
-
-            <Text fontSize={["xs", "sm"]}>
-              <b>Scholarship Amount :</b> {jobInfo?.item?.price?.value}
-            </Text>
-          </HStack>
-        </Box>
-        <Box
-          marginTop={[2, 4]}
-          display="flex"
-          justifyContent={["center", "flex-start"]}
-        >
-          <Button
-            marginTop={2}
-            marginRight={[0, 5]}
-            width={["100%", 200]}
-            colorScheme="blue"
-            variant="solid"
-            backgroundColor="blue.500"
-            color="white"
-            onClick={() => {
-              navigate(
-                `/${envConfig?.listLink}/automatedForm/${jobId}/${transactionId}`,
-                {
-                  state: {
-                    jobDetails: jobDetails,
-                  },
-                }
-              );
-            }}
-          >
-            {t("Apply")}
-          </Button>
-        </Box>
-      </Box>
-
       {loading ? (
         <Loader />
       ) : (
-        <Box
-          fontFamily={"Alice"}
-          marginLeft={4}
-          marginRight={4}
-          padding={4}
-          marginTop={5}
-          borderRadius={15}
-          backgroundColor={"white"}
-        >
-          <Text fontSize={16} fontWeight={700}>
-            {t("Job_Description")}
-          </Text>
+        <div>
+          <div className="contianer">
+            <div className="" style={{ textAlign: "left" }}>
+              <h2 className="page-title">{jobInfo?.title}</h2>
+              {jobInfo?.provider_name && (
+                <h4 className="page-sub-title">{jobInfo?.provider_name}</h4>
+              )}
+              {jobInfo?.company && (
+                <h4 className="page-sub-title">{jobInfo?.company}</h4>
+              )}
+              <div className="" style={{ marginTop: "4px" }}>
+                {(jobInfo?.city || jobInfo?.state) && (
+                  <div className="" style={{ display: "flex" }}>
+                    <i className="icon">📍</i>{" "}
+                    <p className="page-text">{jobInfo?.city}</p>
+                    {jobInfo?.city && jobInfo?.state ? (
+                      <p className="page-text">, {jobInfo?.state}</p>
+                    ) : (
+                      <p className="page-text">{jobInfo?.state}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="" style={{ marginTop: "4px" }}>
+                <div style={{ display: "flex" }}>
+                  <p className="page-text">
+                    {jobInfo?.item?.descriptor?.long_desc}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="page-text">
+                  <b>Scholarship Amount :</b>{" "}
+                  {jobInfo?.item?.price
+                    ? `${jobInfo.item?.price.currency} ${jobInfo.item?.price.minimum_value}-${jobInfo.item?.price.maximum_value}`
+                    : "Not mentioned"}
+                </p>
+              </div>
+            </div>
+            <div
+              className=""
+              style={{
+                marginTop: "8px",
+                display: "flex",
+                justifyContent: "flex-start",
+              }}
+            >
+              <button
+                className="autosubmit"
+                type="button"
+                onClick={() => {
+                  navigate(
+                    `/${envConfig?.listLink}/automatedForm/${jobId}/${transactionId}`,
+                    {
+                      state: {
+                        jobDetails: jobDetails,
+                      },
+                    }
+                  );
+                }}
+              >
+                {t("Apply")}
+              </button>
+            </div>
+          </div>
 
-          {jobInfo?.description ? (
-            <Text marginTop={2} fontSize={["xs", "sm"]} color={"gray.700"}>
-              {" "}
-              {jobInfo?.description}{" "}
-            </Text>
-          ) : (
-            <Text marginTop={2} fontSize={["xs", "sm"]} color={"gray.700"}>
-              {" "}
-              {t("Job_description_is_not_available")}{" "}
-            </Text>
-          )}
-          <Box marginTop={4}>
+          <div style={{ marginTop: "16px", textAlign: "left" }}>
+            <h4 className="page-sub-title">{t("Job_Description")}</h4>
+            {jobInfo?.description ? (
+              <p className="page-text"> {jobInfo?.description} </p>
+            ) : (
+              <p className="page-text">
+                {" "}
+                {t("Job_description_is_not_available")}{" "}
+              </p>
+            )}
             {jobsData?.tags?.map((tag, index) => (
-              <Box key={index} marginBottom={3}>
-                <Text fontSize={["sm"]} color={"black"} fontWeight={700}>
-                  {tag.descriptor.name}
-                </Text>
+              <div key={index} style={{ marginTop: "9px" }}>
+                <h6 className="page-sub-title">{tag.descriptor.name}</h6>
                 {tag.list.map((item, itemIndex) => (
                   <div key={itemIndex}>
                     <ul style={{ marginLeft: "3rem", listStyleType: "disc" }}>
@@ -323,47 +236,39 @@ function JobDetails() {
                         {!item?.descriptor?.name &&
                           item?.descriptor?.code &&
                           item?.value !== "" && (
-                            <Text fontSize={["xs", "sm"]} color="gray.700">
+                            <p className="page-text">
                               {item?.descriptor?.code}
-                            </Text>
+                            </p>
                           )}
 
                         {item?.descriptor?.name &&
                         item?.value &&
                         item?.value !== "null" &&
                         item?.value !== null ? (
-                          <Box display="flex">
+                          <div style={{ display: "flex" }}>
                             {item?.descriptor?.name && (
-                              <Text
-                                fontSize={["xs", "sm"]}
-                                color="gray.900"
-                                marginRight={2}
-                              >
+                              <p className="page-text">
                                 {item?.descriptor?.name}:
-                              </Text>
+                              </p>
                             )}
                             {item?.value && (
-                              <Text fontSize={["xs", "sm"]} color="gray.700">
-                                {item?.value}
-                              </Text>
+                              <p className="page-text">{item?.value}</p>
                             )}
-                          </Box>
+                          </div>
                         ) : (
                           <div>
-                            <Text fontSize={["xs", "sm"]} color="gray.700">
-                              {t("Not_Provided")}
-                            </Text>
+                            <p className="page-text">{t("Not_Provided")}</p>
                           </div>
                         )}
                       </li>
                     </ul>
                   </div>
                 ))}
-                <Divider my={2} borderWidth="0.5px" />
-              </Box>
+                <hr className="" style={{ border: "1px solid lightGrey" }} />
+              </div>
             ))}
-          </Box>
-        </Box>
+          </div>
+        </div>
       )}
     </div>
   );
