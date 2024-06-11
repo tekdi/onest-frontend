@@ -179,6 +179,7 @@ export const dataConfig = {
     listLink: "learning",
     detailLink: "/learning/:id",
     apiLink: `${env.VITE_LEARNINGS_API_BASE_URL}/content/search`,
+    filters: ["provider_name"],
     imageUrl: "",
     apiLink_DB_CACHE: env.VITE_LEARNINGS_DB_CACHE,
     apiLink_API_ROUTE: "content",

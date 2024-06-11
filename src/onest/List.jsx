@@ -61,6 +61,7 @@ const List = () => {
         });
       }
       setFilterCardData(filteredData);
+      setTotalRows(filteredData?.length);
     };
     fetchData();
   }, [filter, cardData]);
@@ -157,27 +158,32 @@ const List = () => {
           </div>
         </div>
       )}
-      <div>
-        <label htmlFor="limit">Results per page:</label>
-        <select id="limit" value={limit} onChange={handleLimitChange}>
-          {[5, 10, 15, 20].map((value) => (
-            <option key={value} value={value} disabled={value === limit}>
-              {value}
-            </option>
-          ))}
-        </select>
-      </div>
+      <p className="" style={{ textAlign: "right" }}>
+        Showing {startIndex + 1} to {endIndex} of {totalRows} results
+      </p>
       <div className="card-container">
         {currentPageData?.map((e) => (
           <RenderCards key={e.id} obj={e} config={config} />
         ))}
       </div>
-      <Pagination
-        limit={limit}
-        page={currentPage}
-        totalRows={totalRows}
-        onPageChange={handlePageChange}
-      />
+      <div className="pagination-container">
+        <Pagination
+          limit={limit}
+          page={currentPage}
+          totalRows={totalRows}
+          onPageChange={handlePageChange}
+        />
+        <div className="limit-select">
+          <label htmlFor="limit">Results per page:</label>
+          <select id="limit" value={limit} onChange={handleLimitChange}>
+            {[5, 10, 15, 20].map((value) => (
+              <option key={value} value={value} disabled={value === limit}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
     </div>
   );
 };
