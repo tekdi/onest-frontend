@@ -255,6 +255,33 @@ const AutomatedForm = () => {
       const paramBody = initReqBodyJson.init[1];
 
       // Perform API call with formData
+      const configData = dataConfig[type] || {};
+      if (configData?.getActivitiesAndEvents) {
+        let telemetry = {
+          eid: "LOG",
+          ets: 0,
+          ver: 1,
+          mid: "/confirm",
+          actor: {
+            id: "user",
+            type: "user",
+          },
+          context: {
+            channel: "ONEST-" + type,
+            pdata: {
+              id: type + "_/confirm",
+            },
+            env: "ONEST",
+          },
+          edata: {
+            type: "API",
+            level: "trace",
+            message: "/confirm api call",
+            params: { transaction_id: transactionId },
+          },
+        };
+        configData.getActivitiesAndEvents(telemetry);
+      }
       const response = await fetch(`${baseUrl}/confirm`, {
         method: "POST",
         headers: {
@@ -399,6 +426,33 @@ const AutomatedForm = () => {
   const getSelectDetails = async (jobInfo) => {
     try {
       //setLoading(true);
+      const configData = dataConfig[type] || {};
+      if (configData?.getActivitiesAndEvents) {
+        let telemetry = {
+          eid: "LOG",
+          ets: 0,
+          ver: 1,
+          mid: "/select",
+          actor: {
+            id: "user",
+            type: "user",
+          },
+          context: {
+            channel: "ONEST-" + type,
+            pdata: {
+              id: type + "_/select",
+            },
+            env: "ONEST",
+          },
+          edata: {
+            type: "API",
+            level: "trace",
+            message: "/select api call",
+            params: { provider_id: jobInfo?.provider_id, item_id: jobId },
+          },
+        };
+        configData.getActivitiesAndEvents(telemetry);
+      }
       const response = await fetch(`${baseUrl}/select`, {
         method: "POST",
         headers: {
@@ -479,6 +533,33 @@ const AutomatedForm = () => {
 
       const paramBody = initReqBody;
       // Perform API call with formData
+      const configData = dataConfig[type] || {};
+      if (configData?.getActivitiesAndEvents) {
+        let telemetry = {
+          eid: "LOG",
+          ets: 0,
+          ver: 1,
+          mid: "/init",
+          actor: {
+            id: "user",
+            type: "user",
+          },
+          context: {
+            channel: "ONEST-" + type,
+            pdata: {
+              id: type + "_/init",
+            },
+            env: "ONEST",
+          },
+          edata: {
+            type: "API",
+            level: "trace",
+            message: "/init api call",
+            params: { transaction_id: transactionId },
+          },
+        };
+        configData.getActivitiesAndEvents(telemetry);
+      }
       const response = await fetch(`${baseUrl}/init`, {
         method: "POST",
         headers: {
@@ -535,6 +616,34 @@ const AutomatedForm = () => {
   useEffect(() => {
     setLoading(true);
     localStorage.setItem("submissionId", "");
+    const configData = dataConfig[type] || {};
+
+    if (configData?.getActivitiesAndEvents) {
+      let telemetry = {
+        eid: "LOG",
+        ets: 0,
+        ver: 1,
+        mid: "content/search",
+        actor: {
+          id: "user",
+          type: "user",
+        },
+        context: {
+          channel: "ONEST-" + type,
+          pdata: {
+            id: type + "_/content/search",
+          },
+          env: "ONEST",
+        },
+        edata: {
+          type: "API",
+          level: "trace",
+          message: "content/search api call",
+          params: { item_id: jobId },
+        },
+      };
+      configData.getActivitiesAndEvents(telemetry);
+    }
     var requestOptions = {
       method: "POST",
       headers: {
@@ -574,6 +683,31 @@ const AutomatedForm = () => {
   }, [jobInfo]);
 
   const submitFormDetail = async (action, urlencoded) => {
+    const configData = dataConfig[type] || {};
+    if (configData?.getActivitiesAndEvents) {
+      let telemetry = {
+        eid: "INTRACT",
+        ets: 0,
+        ver: 1,
+        mid: "submit_button_click",
+        actor: {
+          id: "user",
+          type: "user",
+        },
+        context: {
+          channel: "ONEST-" + type,
+          pdata: {
+            id: "submit_button",
+          },
+          env: "ONEST",
+        },
+        edata: {
+          type: "click",
+          pageid: "button",
+        },
+      };
+      configData.getActivitiesAndEvents(telemetry);
+    }
     setLoading(true);
     try {
       const axiosResponse = await axios.create().post(action, urlencoded, {

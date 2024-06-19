@@ -61,7 +61,36 @@ const Details = () => {
       } else {
         productInfo = product;
       }
-
+      const configData = dataConfig[type] || {};
+      if (configData?.getActivitiesAndEvents) {
+        let telemetry = {
+          eid: "LOG",
+          ets: 0,
+          ver: 1,
+          mid: "/select",
+          actor: {
+            id: "user",
+            type: "user",
+          },
+          context: {
+            channel: "ONEST-" + type,
+            pdata: {
+              id: type + "_/select",
+            },
+            env: "ONEST",
+          },
+          edata: {
+            type: "API",
+            level: "trace",
+            message: "/select api call",
+            params: {
+              provider_id: productInfo?.provider_id,
+              item_id: productInfo?.item_id,
+            },
+          },
+        };
+        configData.getActivitiesAndEvents(telemetry);
+      }
       let bodyData = {
         context: {
           domain: envConfig?.apiLink_DOMAIN,
@@ -151,6 +180,34 @@ const Details = () => {
   useEffect(() => {
     const fetchData = async () => {
       // registerTelementry(siteUrl, transactionId);
+      const configData = dataConfig[type] || {};
+
+      if (configData?.getActivitiesAndEvents) {
+        let telemetry = {
+          eid: "LOG",
+          ets: 0,
+          ver: 1,
+          mid: "content/search",
+          actor: {
+            id: "user",
+            type: "user",
+          },
+          context: {
+            channel: "ONEST-" + type,
+            pdata: {
+              id: type + "_/content/search",
+            },
+            env: "ONEST",
+          },
+          edata: {
+            type: "API",
+            level: "trace",
+            message: "content/search api call",
+            params: { item_id: jobId, transaction_id: transactionId },
+          },
+        };
+        configData.getActivitiesAndEvents(telemetry);
+      }
       var requestOptions = {
         method: "POST",
         headers: {
@@ -192,6 +249,33 @@ const Details = () => {
   }, [transactionId]); // Runs only once when the component mounts
 
   const handleSubscribe = (productData) => {
+    const configData = dataConfig[type] || {};
+    if (configData?.getActivitiesAndEvents) {
+      let telemetry = {
+        eid: "INTRACT",
+        ets: 0,
+        ver: 1,
+        mid: "subscribe_button_click",
+        actor: {
+          id: "user",
+          type: "user",
+        },
+        context: {
+          channel: "ONEST-" + type,
+          pdata: {
+            id: transactionId,
+          },
+          env: "ONEST",
+        },
+        edata: {
+          type: "click",
+          pageid: "button",
+          provider_name: productData?.provider_name,
+          title: productData?.title,
+        },
+      };
+      configData.getActivitiesAndEvents(telemetry);
+    }
     navigate(
       `/${envConfig?.listLink}/confirm/${productData?.item_id}/${transactionId}`,
       {

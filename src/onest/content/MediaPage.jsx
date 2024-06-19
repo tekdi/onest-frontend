@@ -133,6 +133,34 @@ const MediaPage = () => {
         setUrlType(trackData?.params?.type);
         setLoading(false);
       } else {
+        const configData = dataConfig[type] || {};
+
+        if (configData?.getActivitiesAndEvents) {
+          let telemetry = {
+            eid: "LOG",
+            ets: 0,
+            ver: 1,
+            mid: "content/search",
+            actor: {
+              id: "user",
+              type: "user",
+            },
+            context: {
+              channel: "ONEST-" + type,
+              pdata: {
+                id: type + "_/content/search",
+              },
+              env: "ONEST",
+            },
+            edata: {
+              type: "API",
+              level: "trace",
+              message: "content/search api call",
+              params: { item_id: itemId },
+            },
+          };
+          configData.getActivitiesAndEvents(telemetry);
+        }
         var requestOptions = {
           method: "POST",
           headers: {
@@ -191,6 +219,33 @@ const MediaPage = () => {
   const getSelectDetails = async (info) => {
     try {
       //setLoading(true);
+      const configData = dataConfig[type] || {};
+      if (configData?.getActivitiesAndEvents) {
+        let telemetry = {
+          eid: "LOG",
+          ets: 0,
+          ver: 1,
+          mid: "/select",
+          actor: {
+            id: "user",
+            type: "user",
+          },
+          context: {
+            channel: "ONEST-" + type,
+            pdata: {
+              id: type + "_/select",
+            },
+            env: "ONEST",
+          },
+          edata: {
+            type: "API",
+            level: "trace",
+            message: "/select api call",
+            params: { provider_id: info?.provider_id, item_id: itemId },
+          },
+        };
+        configData.getActivitiesAndEvents(telemetry);
+      }
       const response = await fetch(`${baseUrl}/select`, {
         method: "POST",
         headers: {
@@ -312,7 +367,38 @@ const MediaPage = () => {
         };
         // bodyData.message.order.items[0].xinput.form['submission_id'] = localStorage.getItem('submissionId')? localStorage.getItem('submissionId'): '';
       }
+      const configData = dataConfig[type] || {};
 
+      if (configData?.getActivitiesAndEvents) {
+        const params1 = {};
+        if (localStorage.getItem("submissionId")) {
+          params1.submission_id = localStorage.getItem("submissionId");
+        }
+        let telemetry = {
+          eid: "LOG",
+          ets: 0,
+          ver: 1,
+          mid: "/confirm",
+          actor: {
+            id: "user",
+            type: "user",
+          },
+          context: {
+            channel: "ONEST-" + type,
+            pdata: {
+              id: type + "_/confirm",
+            },
+            env: "ONEST",
+          },
+          edata: {
+            type: "API",
+            level: "trace",
+            message: "/confirm api call",
+            params: params1,
+          },
+        };
+        configData.getActivitiesAndEvents(telemetry);
+      }
       const result = await post(`${baseUrl}/confirm`, bodyData);
       let response = result?.data;
 
@@ -442,7 +528,36 @@ const MediaPage = () => {
             },
           },
         };
-
+        const configData = dataConfig[type] || {};
+        if (configData?.getActivitiesAndEvents) {
+          let telemetry = {
+            eid: "LOG",
+            ets: 0,
+            ver: 1,
+            mid: "/init",
+            actor: {
+              id: "user",
+              type: "user",
+            },
+            context: {
+              channel: "ONEST-" + type,
+              pdata: {
+                id: type + "_/init",
+              },
+              env: "ONEST",
+            },
+            edata: {
+              type: "API",
+              level: "trace",
+              message: "/init api call",
+              params: {
+                provider_id: details?.message?.order?.provider?.id,
+                item_id: details?.message?.order?.items[0]?.id,
+              },
+            },
+          };
+          configData.getActivitiesAndEvents(telemetry);
+        }
         const result = await post(`${baseUrl}/init`, bodyData);
         const data = result?.data;
         localStorage.setItem("initRes", JSON.stringify(data?.responses?.[0]));
