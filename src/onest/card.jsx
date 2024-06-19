@@ -1,6 +1,31 @@
 import "./styles.css";
-const env = import.meta.env;
+import ReactGA from "react-ga4";
 
+const env = import.meta.env;
+const getActivitiesAndEvents = (telemetry) => {
+  if (localStorage.getItem("console")) {
+    console.log(telemetry);
+  }
+  const track = {
+    category: telemetry?.mid,
+    action: telemetry?.edata?.type,
+    lable: telemetry?.pdata?.type, //page name
+    user_id: telemetry?.actor?.id,
+  };
+  if (process.env.REACT_APP_GA_KEY) {
+    ReactGA.event(track);
+    if (localStorage.getItem("console")) {
+      console.log("capture in GA");
+    }
+  } else {
+    if (localStorage.getItem("console")) {
+      console.log("GA key not found");
+    }
+  }
+};
+export const landingTelemetry = {
+  getActivitiesAndEvents: getActivitiesAndEvents,
+};
 export const dataConfig = {
   scholarship: {
     title: "Scholarship",
@@ -18,6 +43,7 @@ export const dataConfig = {
     imageUrl: "",
 
     apiResponse: (e) => e.data?.data?.[env.VITE_SCHOLASHIPS_DB_CACHE],
+    getActivitiesAndEvents: getActivitiesAndEvents,
     onOrderIdGenerate: async (val) => {
       const data = {
         user_id: `${val.userData.user_id}`,
@@ -111,6 +137,7 @@ export const dataConfig = {
     imageUrl: "",
 
     apiResponse: (e) => e.data?.data?.[env.VITE_JOBS_DB_CACHE],
+    getActivitiesAndEvents: getActivitiesAndEvents,
     onOrderIdGenerate: async (val) => {
       const data = {
         user_id: val?.userData.user_id,
@@ -190,6 +217,7 @@ export const dataConfig = {
     apiLink_BASE_URL: env.VITE_BASE_URL,
 
     apiResponse: (e) => e.data?.data?.[env.VITE_LEARNINGS_DB_CACHE],
+    getActivitiesAndEvents: getActivitiesAndEvents,
     onOrderIdGenerate: async (val) => {
       const paramData = { url: "", type: "" };
       paramData.url =

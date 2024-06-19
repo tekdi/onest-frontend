@@ -6,8 +6,12 @@ import AutomatedForm from "./onest/AutomatedForm";
 import List from "./onest/List";
 import View from "./onest/View";
 import NotFound from "./onest/NotFound";
+import ReactGA from "react-ga4";
 
 const App = () => {
+  if (process.env.REACT_APP_GA_KEY) {
+    ReactGA.initialize(process.env.REACT_APP_GA_KEY);
+  }
   return (
     <div className="container">
       <Router>

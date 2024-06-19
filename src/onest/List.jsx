@@ -18,11 +18,63 @@ const List = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
   const [limit, setLimit] = useState(10);
-
+  useEffect(() => {
+    const configData = dataConfig[type] || {};
+    if (configData?.getActivitiesAndEvents) {
+      let telemetry = {
+        eid: "IMPRESSION",
+        ets: 0,
+        ver: 1,
+        mid: type + "_list",
+        actor: {
+          id: "user",
+          type: "user",
+        },
+        context: {
+          channel: "ONEST-" + type,
+          pdata: {
+            id: type + "_list",
+          },
+          env: "ONEST",
+        },
+        edata: {
+          type: type + "_list",
+          pageid: type + "_list_page",
+        },
+      };
+      configData.getActivitiesAndEvents(telemetry);
+    }
+  }, []);
   useEffect(() => {
     const fetchJobsData = async () => {
       try {
         const configData = dataConfig[type] || {};
+        if (configData?.getActivitiesAndEvents) {
+          let telemetry = {
+            eid: "LOG",
+            ets: 0,
+            ver: 1,
+            mid: "content/search",
+            actor: {
+              id: "user",
+              type: "user",
+            },
+            context: {
+              channel: "ONEST-" + type,
+              pdata: {
+                id: type + "_list",
+              },
+              env: "ONEST",
+            },
+            edata: {
+              type: "API",
+              level: "trace",
+              message: "content/search api call",
+              params: configData?.payload || {},
+            },
+          };
+          configData.getActivitiesAndEvents(telemetry);
+        }
         setConfig(configData);
         const apiUrl = configData?.apiLink;
         setLoading(true);
@@ -67,6 +119,32 @@ const List = () => {
   }, [filter, cardData]);
 
   const handleFilter = (key, value) => {
+    const configData = dataConfig[type] || {};
+    if (configData?.getActivitiesAndEvents) {
+      let telemetry = {
+        eid: "SEARCH",
+        ets: 0,
+        ver: 1,
+        mid: type + "_filter",
+        actor: {
+          id: "user",
+          type: "user",
+        },
+        context: {
+          channel: "ONEST-" + type,
+          pdata: {
+            id: type + "_filter",
+          },
+          env: "ONEST",
+        },
+        edata: {
+          type: type + "_filter",
+          pageid: type + "_filter_list",
+          filters: { [key]: value },
+        },
+      };
+      configData.getActivitiesAndEvents(telemetry);
+    }
     setFilter((prevFilter) => ({
       ...prevFilter,
       [key]: value,

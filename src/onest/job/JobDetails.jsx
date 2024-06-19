@@ -44,6 +44,36 @@ function JobDetails() {
   const fetchJobDetails = async (jobInfo) => {
     try {
       setLoading(true);
+      const configData = dataConfig[type] || {};
+      if (configData?.getActivitiesAndEvents) {
+        let telemetry = {
+          eid: "LOG",
+          ets: 0,
+          ver: 1,
+          mid: "/select",
+          actor: {
+            id: "user",
+            type: "user",
+          },
+          context: {
+            channel: "ONEST-" + type,
+            pdata: {
+              id: type + "_/select",
+            },
+            env: "ONEST",
+          },
+          edata: {
+            type: "API",
+            level: "trace",
+            message: "/select api call",
+            params: {
+              provider_id: jobInfo?.provider_id,
+              item_id: jobInfo?.jobId,
+            },
+          },
+        };
+        configData.getActivitiesAndEvents(telemetry);
+      }
       const response = await fetch(`${baseUrl}/select`, {
         method: "POST",
         headers: {
@@ -160,6 +190,34 @@ function JobDetails() {
     if (transactionId === undefined) {
       settransactionId(uuidv4()); // Update state only when necessary
     } else {
+      const configData = dataConfig[type] || {};
+
+      if (configData?.getActivitiesAndEvents) {
+        let telemetry = {
+          eid: "LOG",
+          ets: 0,
+          ver: 1,
+          mid: "jobs/search",
+          actor: {
+            id: "user",
+            type: "user",
+          },
+          context: {
+            channel: "ONEST-" + type,
+            pdata: {
+              id: type + "_/jobs/search",
+            },
+            env: "ONEST",
+          },
+          edata: {
+            type: "API",
+            level: "trace",
+            message: "jobs/search api call",
+            params: { item_id: jobId, transaction_id: transactionId },
+          },
+        };
+        configData.getActivitiesAndEvents(telemetry);
+      }
       var requestOptions = {
         method: "POST",
         headers: {

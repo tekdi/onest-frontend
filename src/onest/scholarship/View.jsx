@@ -25,7 +25,33 @@ function JobDetails() {
   const { jobId } = useParams();
   const [siteUrl] = useState(window.location.href);
   const [transactionId] = useState(uuidv4());
-
+  useEffect(() => {
+    const configData = dataConfig[type] || {};
+    if (configData?.getActivitiesAndEvents) {
+      let telemetry = {
+        eid: "IMPRESSION",
+        ets: 0,
+        ver: 1,
+        mid: "scholarship_detail",
+        actor: {
+          id: "user",
+          type: "user",
+        },
+        context: {
+          channel: "ONEST-" + type,
+          pdata: {
+            id: jobId,
+          },
+          env: "ONEST",
+        },
+        edata: {
+          type: "scholarship_detail",
+          pageid: "scholarship_detail_visit",
+        },
+      };
+      configData.getActivitiesAndEvents(telemetry);
+    }
+  }, []);
   const errorMessage = (message) => {
     const toast = document.getElementById("toast");
     toast.textContent = message;
